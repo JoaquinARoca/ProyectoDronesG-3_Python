@@ -1,6 +1,6 @@
 # Guía para el proyecto de drones   
  
-## Introducción   
+## 1. Introducción   
 
 El proceso que se describe en este guía tiene por objetivo el desarrollo de una aplicación de control de un dron (o varios) que pueda demostrarse en el DroneLab del Campus del Baix Llobregat. Esta aplicación se desarrollará en equipos de 3 o 4 personas.
 El proceso permite el aprendizaje de una variedad de conceptos, tecnologías y herramientas. En particular, se aprende (entre otras cosas):   
@@ -12,26 +12,40 @@ El proceso permite el aprendizaje de una variedad de conceptos, tecnologías y h
 •	Cómo se transmite/recibe el stream de vídeo capturado por la cámara del dron
 •	Cómo se reconocen objetos en el stream de vídeo
 
-La aplicación tiene 4 versiones. La versión 1 está muy guiada. Se desarrolla paso a paso siguiendo las instrucciones de esta guía. En cada paso se introduce algún concepto/herramienta/tecnología nueva. Este repositorio proporciona los códigos implicados en cada paso de manera que basta comprobar que el código funciona correctamente. La guía también propone sencillos ejercicios que requieren la modificación del código proporcionado para corregir algún mal funcionamiento o para introducir alguna nueva funcionalidad. Es muy conveniente que cada miembro del equipo desarrolle de forma individual esta primera versión, aunque naturalmente compartiendo dudas y progresos con los compañeros de equipo y con los profesores.
-La versión 2 tiene unos requisitos prefijados, pero está mucho menos guiada que la versión 1. También se proporcionarán algunos códigos útiles pero la tarea fundamental consistirá en la investigación y experimentación necesarias para implementar las nuevas funcionalidades. El trabajo de la versión 2 se beneficiará mucho de un buen reparto de tareas entre los miembros del equipo.
-Acabada la versión 2 cada equipo deberá decidir las funcionalidades que tendrá la versión final de su aplicación. En esta guía se proporcionarán algunas ideas que pueden resultar de inspiración. Cada equipo deberá decidir también que subconjunto de las funcionalidades estará ya disponible en la versión 3, que será una versión intermedia pero que deberá poder ser demostrada en el DroneLab.
+La aplicación tiene 4 versiones. La versión 1 está muy guiada. Se desarrolla paso a paso siguiendo las instrucciones de esta guía. En cada paso se introduce algún concepto/herramienta/tecnología nueva. Este repositorio proporciona los códigos implicados en cada paso de manera que basta comprobar que el código funciona correctamente. La guía también propone sencillos ejercicios que requieren la modificación del código proporcionado para corregir algún mal funcionamiento o para introducir alguna nueva funcionalidad. Es muy conveniente que cada miembro del equipo desarrolle de forma individual esta primera versión, aunque naturalmente compartiendo dudas y progresos con los compañeros de equipo y con los profesores.    
+ 
+La versión 2 tiene unos requisitos prefijados, pero está mucho menos guiada que la versión 1. También se proporcionarán algunos códigos útiles pero la tarea fundamental consistirá en la investigación y experimentación necesarias para implementar las nuevas funcionalidades. El trabajo de la versión 2 se beneficiará mucho de un buen reparto de tareas entre los miembros del equipo.    
+ 
+Acabada la versión 2 cada equipo deberá decidir las funcionalidades que tendrá la versión final de su aplicación. En esta guía se proporcionarán algunas ideas que pueden resultar de inspiración. Cada equipo deberá decidir también que subconjunto de las funcionalidades estará ya disponible en la versión 3, que será una versión intermedia pero que deberá poder ser demostrada en el DroneLab.     
+ 
 La versión 4 será la versión final con todas las funcionalidades previstas. Además de demostrar el correcto funcionamiento en el DroneLab, cada equipo deberá entregar el resultado en forma de repositorio en GitHub, que incluya los códigos desarrollados, explicaciones detalladas sobre cómo instalar y poner en marcha la aplicación y vídeos que muestren el funcionamiento y describan cómo está organizado el código desarrollado.    
 
 ## 2. Criterios de evaluación    
 
-Recursos
-Mission Planner y SITL
-Python y PyCharm o Visual Studio Code
-Visual C# y Visual Studio
-Repo taller teleco-renta, que incluye una breve descripción de cómo es el dron
-Librería DronLink
-Librería csDronLink
 
-Versión 1
-Escenario local
-En un escenario local la estación de tierra que controla el dron está directamente conectada a éste, a través de la radio de telemetría. Por tanto, es el código de la estación de tierra el que genera las órdenes para el dron usando las funciones de la librería DronLink. 
-Veamos dos casos de estación de tierra, una implementada en Python y otra en C#.
-Estación de tierra en Python para el escenario local
+## 3. Recursos    
+Mission Planner y SITL    
+
+Python y PyCharm o Visual Studio Code     
+
+Visual C# y Visual Studio    
+
+Repo taller teleco-renta, que incluye una breve descripción de cómo es el dron    
+
+Librería DronLink    
+
+Librería csDronLink    
+
+
+## 4. Versión 1    
+
+### 4.1 Escenario local    
+
+En un escenario local la estación de tierra que controla el dron está directamente conectada a éste, a través de la radio de telemetría. Por tanto, es el código de la estación de tierra el que genera las órdenes para el dron usando las funciones de la librería DronLink.    
+  
+Veamos dos casos de estación de tierra, una implementada en Python y otra en C#.    
+
+#### 4.1.1 Estación de tierra en Python para el escenario local
 La estación de tierra en Python tiene una interfaz de usuario como la que se muestra en la imagen.
  
 
