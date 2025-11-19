@@ -46,23 +46,27 @@ En un escenario local la estación de tierra que controla el dron está directam
 Veamos dos casos de estación de tierra, una implementada en Python y otra en C#.    
 
 #### 4.1.1 Estación de tierra en Python para el escenario local
-La estación de tierra en Python tiene una interfaz de usuario como la que se muestra en la imagen.
+La estación de tierra en Python tiene una interfaz de usuario como la que se muestra en la imagen.    
  
+<img width="272" height="511" alt="image" src="https://github.com/user-attachments/assets/6ef6efb5-aca7-46d2-9e91-6910a030900c" />   
+ 
+Se trata de un conjunto de botones para ordenar algunas operaciones muy básicas. La interfaz está hecha en Tkinter. Conviene pensar en esa interfaz como una matriz de 9 filas y 2 columnas. Los diferentes widgets (botones, etiquetas, etc.) se disponen en esa matriz. Por ejemplo, el botón para conectarse con el dron se coloca en la fila 0 y se extiende a lo largo de las 2 columnas. Sin embargo, el botón de aterrizar se coloca en la fila 4 y ocupa la primera columna. El bloque de Navegación va a la fila 5, ocupa las dos columnas, pero tiene asociado un espacio lateral a la izquierda, que hace que se desplace un poco hacia el centro. Aunque el código que genera esa interfaz gráfica puede atemorizar un poco inicialmente, en realidad es sencillo si se tiene presente la matriz en la que se disponen los widgets.   
+ 
+Cuando se pulsa alguno de los botones de la interfaz, el programa usa la función adecuada de la librería DronLink para enviar la orden al dron. El botón de conexión usa la función de la librería para establecer una conexión con el simulador SITL, que naturalmente debe estar en marcha.   
+   
+Es importante observar lo que ocurre al pulsar el botón de despegar. Se hace una llamada no bloqueante a la función correspondiente de la librería y se indica también una función de callback que la librería ejecutará cuando el dron haya alcanzado la altura de despegue. Puesto que la llamada es no bloqueante, la interfaz gráfica sigue operativa durante el despegue y, por tanto, pueden verse los datos de telemetría (por ejemplo, la altura del dron), si se piden esos datos clicando el botón correspondiente. La función de callback se limita a poner en color verde el botón para indicar visualmente que el dron ya ha alcanzado la altura esperada.    
+ 
+En cambio, los botones de aterrizaje y RTL no tienen ese comportamiento. Al pulsar el botón de aterrizaje el dron efectivamente inicia el aterrizaje, pero al haber usado una llamada bloqueante, la interfaz gráfica queda congelada hasta que el dron está en tierra. Eso impide, por ejemplo, observan cómo cambia la altura del dron durante el aterrizaje.    
+ 
+Los 9 botones de navegación permiten hacer que el dron navegue en cualquiera de las direcciones indicadas (Norte, Sur, etc). El dron navegará en la dirección elegida hasta que se pulse el botón correspondiente a otra dirección o el botón de Stop (o aterrizaje o RTL).    
+  
+Se proponen lo siguientes ejercicios:    
 
-Se trata de un conjunto de botones para ordenar algunas operaciones muy básicas. 
-La interfaz está hecha en Tkinter. Conviene pensar en esa interfaz como una matriz de 9 filas y 2 columnas. Los diferentes widgets (botones, etiquetas, etc.) se disponen en esa matriz. Por ejemplo, el botón para conectarse con el dron se coloca en la fila 0 y se extiende a lo largo de las 2 columnas. Sin embargo, el botón de aterrizar se coloca en la fila 4 y ocupa la primera columna. El bloque de Navegación va a la fila 5, ocupa las dos columnas, pero tiene asociado un espacio lateral a la izquierda, que hace que se desplace un poco hacia el centro. Aunque el código que genera esa interfaz gráfica puede atemorizar un poco inicialmente, en realidad es sencillo si se tiene presente la matriz en la que se disponen los widgets. 
-Cuando se pulsa alguno de los botones de la interfaz, el programa usa la función adecuada de la librería DronLink para enviar la orden al dron. 
-El botón de conexión usa la función de la librería para establecer una conexión con el simulador SITL, que naturalmente debe estar en marcha. 
-Es importante observar lo que ocurre al pulsar el botón de despegar. Se hace una llamada no bloqueante a la función correspondiente de la librería y se indica también una función de callback que la librería ejecutará cuando el dron haya alcanzado la altura de despegue. Puesto que la llamada es no bloqueante, la interfaz gráfica sigue operativa durante el despegue y, por tanto, pueden verse los datos de telemetría (por ejemplo, la altura del dron), si se piden esos datos clicando el botón correspondiente. La función de callback se limita a poner en color verde el botón para indicar visualmente que el dron ya ha alcanzado la altura esperada.
-En cambio, los botones de aterrizaje y RTL no tienen ese comportamiento. Al pulsar el botón de aterrizaje el dron efectivamente inicia el aterrizaje, pero al haber usado una llamada bloqueante, la interfaz gráfica queda congelada hasta que el dron está en tierra. Eso impide, por ejemplo, observan cómo cambia la altura del dron durante el aterrizaje.
-Los 9 botones de navegación permiten hacer que el dron navegue en cualquiera de las direcciones indicadas (Norte, Sur, etc). El dron navegará en la dirección elegida hasta que se pulse el botón correspondiente a otra dirección o el botón de Stop (o aterrizaje o RTL).
-Se proponen lo siguientes ejercicios:
 1.	Modificar el código para que las operaciones de aterrizaje y RTL tengan un comportamiento similar a la operación de despegue (llamada no bloqueante)
 2.	Incorporar al bloque de datos de telemetría algún dato más (por ejemplo, el estado del dron o la velocidad). Conviene mirar la documentación de DronLink para ver qué información viene en el paquete de datos de telemetría.
 3.	Añadir algún botón más para realizar una nueva función. De nuevo, mirar la documentación de DronLink en busca de inspiración.
-
-
-Estación de tierra en C# para el escenario local
+   
+#### 4.1.2 Estación de tierra en C# para el escenario local
 Esta versión está hecha en C# usando Windows Forms. La interfaz gráfica se muestra en la figura. Funcionalmente es prácticamente igual que la estación de tierra en Python. En este caso, el usuario puede especificar la altura de despegue, la operación de despegue realiza el armado del dron antes del despegue y entre los datos de telemetría se incluye la posición del dron (latitud y longitud). 
  
 Esta estación de tierra utiliza la librería csDronLink, que es una versión de DronLink para C#, con el mismo modelo de programación (llamadas no bloqueantes, funciones de callback, etc.). 
