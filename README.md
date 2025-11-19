@@ -66,17 +66,26 @@ Se proponen lo siguientes ejercicios:
 2.	Incorporar al bloque de datos de telemetría algún dato más (por ejemplo, el estado del dron o la velocidad). Conviene mirar la documentación de DronLink para ver qué información viene en el paquete de datos de telemetría.
 3.	Añadir algún botón más para realizar una nueva función. De nuevo, mirar la documentación de DronLink en busca de inspiración.
    
-#### 4.1.2 Estación de tierra en C# para el escenario local
-Esta versión está hecha en C# usando Windows Forms. La interfaz gráfica se muestra en la figura. Funcionalmente es prácticamente igual que la estación de tierra en Python. En este caso, el usuario puede especificar la altura de despegue, la operación de despegue realiza el armado del dron antes del despegue y entre los datos de telemetría se incluye la posición del dron (latitud y longitud). 
+#### 4.1.2 Estación de tierra en C# para el escenario local    
  
-Esta estación de tierra utiliza la librería csDronLink, que es una versión de DronLink para C#, con el mismo modelo de programación (llamadas no bloqueantes, funciones de callback, etc.). 
-El botón para conectar establece una conexión con el simulador SITL. Aunque técnicamente sería posible conectar al simulador simultáneamente la estación de tierra en Python y la estación en C#, en la realidad solo una de las dos podrá usar la radio de telemetría para enviar órdenes al dron. Por ese motivo, el botón de conexión se conecta al SITL solo si no está conectada ya la estación en Python.
-Trabajar en Visual C# con Windows Forms tiene la ventaja de que es más fácil (para muchos) diseñar la interfaz gráfica. Además, al ser C# un lenguaje compilado el código se ejecuta más rápido que el código de Python (que es un lenguaje interpretado). Esta es una ventaja relativa porque una interfaz de usuario trabaja en la mayoría de los casos a la velocidad del usuario humano, que no es mucha comparada con la velocidad del ordenador. La desventaja de C# frente a Python es que para implementar una cierta función se requieren normalmente más líneas de código.
-Se proponen los ejercicios siguientes:
+Esta versión está hecha en C# usando Windows Forms. La interfaz gráfica se muestra en la figura. Funcionalmente es prácticamente igual que la estación de tierra en Python. En este caso, el usuario puede especificar la altura de despegue, la operación de despegue realiza el armado del dron antes del despegue y entre los datos de telemetría se incluye la posición del dron (latitud y longitud).   
+  
+<img width="436" height="334" alt="image" src="https://github.com/user-attachments/assets/4f2c31cb-ef7f-4e41-b947-60bdbebb7f60" />
+
+Esta estación de tierra utiliza la librería csDronLink, que es una versión de DronLink para C#, con el mismo modelo de programación (llamadas no bloqueantes, funciones de callback, etc.).   
+ 
+El botón para conectar establece una conexión con el simulador SITL. Aunque técnicamente sería posible conectar al simulador simultáneamente la estación de tierra en Python y la estación en C#, en la realidad solo una de las dos podrá usar la radio de telemetría para enviar órdenes al dron. Por ese motivo, el botón de conexión se conecta al SITL solo si no está conectada ya la estación en Python.    
+ 
+Trabajar en Visual C# con Windows Forms tiene la ventaja de que es más fácil (para muchos) diseñar la interfaz gráfica. Además, al ser C# un lenguaje compilado el código se ejecuta más rápido que el código de Python (que es un lenguaje interpretado). Esta es una ventaja relativa porque una interfaz de usuario trabaja en la mayoría de los casos a la velocidad del usuario humano, que no es mucha comparada con la velocidad del ordenador. La desventaja de C# frente a Python es que para implementar una cierta función se requieren normalmente más líneas de código.     
+ 
+Se proponen los ejercicios siguientes:    
+ 
 1.	Hacer que el usuario pueda establecer la altura de despegue con una barra de desplazamiento, igual que el heading o la velocidad
 2.	Añadir algún dato más a los datos de telemetría (consultar la documentación de csDronLink)
 3.	Incorporar un botón para realizar alguna nueva función (a elegir)
- Escenario global
+   
+### 4.2 Escenario global    
+ 
 En el escenario global, el programa que controla el dron (que llamaremos AutopilotService), además de estar conectado directamente al dron (por ejemplo, a través de la radio de telemetría) está conectado a Internet, de manera que puede recibir peticiones desde otros dispositivos también conectados a Internet, que pueden estar, por tanto, físicamente lejos. La figura ilustra el escenario global.
 El escenario global puede ser interesante en varios casos. En el caso de que el dron tenga un computador abordo (por ejemplo, una Raspberry Pi) conectado por cable al autopiloto, el AutopilotService se ejecutaría en ese computador abordo y podría recibir órdenes por internet. Esto permitiría al dron reaccionar de manera rápida en caso de que se produzcan determinadas situaciones. Por ejemplo, el AutopilotService podría recibir los datos de telemetría del autopiloto, detectar que el dron está peligrosamente cerca de una cierta posición y aterrizar inmediatamente en ese caso. Esta operación también podría implementarse en el escenario local descrito antes, porque los datos de telemetría también pueden llegar a la estación de tierra a través de la radio de telemetría, ser procesados en esa estación de tierra desde la que se enviaría la orden de aterrizaje. Pero ese proceso introduciría un retardo en la operación que podría ser inaceptable.
 Un segundo caso de interés del escenario global sería una aplicación en la que queremos que sean varios dispositivos conectados a internet los que puedan controlar el dron. Eso permitiría, por ejemplo, enviar la orden de despegar desde un dispositivo y la orden de aterrizar desde otro. O podría implementarse un divertido juego en el que el espacio de vuelo se divide en secciones de manera que cada jugador, con su portátil, controla el dron solo cuando éste está dentro de la zona que tiene asignada. 
