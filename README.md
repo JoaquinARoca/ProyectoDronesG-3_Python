@@ -209,8 +209,59 @@ Se proponen los siguientes ejercicios:
 2.	Añadir botones para reconocer otros objetos del data set de COCO.
 
 
+## 5. Versión 2
+Lo que hemos llamado versión 1 no es en realidad una versión de nada. Se trata de diferentes módulos desarrollados de manera independiente para aprender conmceptos y herramientas. Ahora ha llegado el momento de crear una verdadera versión de un sistema en el que los díferentes módulos estén interconectados y puedan colaborar en la tarea de controlar el dron.    
 
+En la versión 2 habrá solo 3 modulos: el dashboard en python, el dashboard en C# y una webapp, todos ellos conectados a Internet. Además, ampliaremos las funcionalidades de todos ellos con, por ejemplo, mapas geolocalizados o control del dron por voz.    
+
+Además, la vesión 2 va a estar mucho menos guiada. Será necesario buscar información, probar y buscar más. El uso de ChatGPT (o similar) será de mucha ayuda, aunque se espera que la versión 2 se construya sobre la base de lo aprendido en la versión 1, y no con códigos muy diferentes, proporcionados por la IA, que funcionas pero a penas se entienden. En cualquier caso, en el apartado 5.2 se proporcionan algunas pistas y se sugieren algunos recursos que pueden ser de ayuda.    
  
+Será también muy adecuado repartir trabajo entre los miembros del equipo para poder cumplir con el plazo de entrega de esta versión.    
+
+### 5.1 Requisitos específicos de esta versión    
+ 
+Veamos los requisitos de cada uno de los tres módulos del sistema a desarrollar.    
+
+#### 5.1.1 Dashboard en Python   
+
+1.  El dashboard en Python debe integrar el servicio de autopiloto y el servicio de cámara. 
+2. Debe poder trabajar en modo local o en modo global, según indique el usuario (quizá con un botón).
+3. Si se pone marcha en modo local entonces debe activar el servicio de autopiloto y el servicio de cámara. 
+4. Siempre tiene que haber una (y solo una) instancia del dashboard que se ponga en marcha en modo local, en el portátil que tenga la radio de telemetría y el receptor del vídeo del dron. 
+5. Pueden ponerse en marcha una o varias instancias del dashboard en modo global que interactuaran con el servicio de autopiloto por MQTT y con el servicio de cámara por WebRTC.
+6. Tanto en modo local como en modo global, el dashboard debe mostrar al usuario un mapa geolocalizado que muestre la posición en la que está el dron en cada momento, igual que lo hace Mission Planner.
+7. El usuario de poder interactuar con el dron a través del mapa, por ejemplo clicando en un punto del mapa para que el dron se dirija a ese punto.
+8. Tanto en modo local como en modo global el usuario debe poder solicitar el reconocimiento de objetos en el stream de video. Incluso debe poder solicitar que se reconozcan varios tipos de objetos simultaneamente, seleccionados de entre un subconjunto del data set de COCO.
+9. El servicio de cámara debe suministrar el stream de video por WebRTC a todos los módulos que lo soliciten.
+
+#### 5.1.2 Dashboard en C#   
+
+1. Debe funcionar en modo global, es decir, haciendo peticiones al servicio de autopiloto por MQTT
+2. Debe mostrar al usuario un mapa geolocalizado con la ubicación del dron en cada momento
+3. El usuario debe poder clicar en el mapa para hacer que el dron se dirija a ese punto
+4. Debe mostrar el stream de video que se recibe por WebRTC del servicio de cámara
+5. El usuario debe poder solicitar el reconocimiento de uno o varios objetos de entre un subconjunto del data ser de COCO
+6. Debe permitir capturar imagenes del stream de video (hacer fotos) y guardarlas, de manera que el usuario pueda verlas cuando quiera en un formulario que muestre una galería de las fotos tomadas
+
+#### 5.1.3 WeApp   
+
+1. Debe tener una pestaña que muestre los botones para controlar el dron, otra para mostrar un mapa geolocalizado con la posición del dron en cada momento y otra con el stream de video que se recibe del dron
+2. Debe comunicarse con el servicio de autopiloto por MQTT y con el servicio de cámara por WebRTC
+3. El usuario debe poder controlar el dron mediante la voz, diciendo palabras clave como: "Despega", "Aterriza", "Vuela hacia el Norte", etc.
+
+## 5.2 Observaciones y recursos
+Para muchos de los retos que se han planteado, la IA puede proporcionar soluciones fáciles de adaptar (por ejemplo, el tema de los mapas geolocalizados o en tema de captar la voz y convertirla en texto). Pero es posible que la IA no ayude mucho en los retos relacionados con la trasmisión del video por WebRTC.
+
+El envío del stream de video por WebRTC a través de Internet no es trivial porque requiere de un proxy con IP pública a la que se conecten tanto el emisor como los diferentes clientes que soliciten el vídeo. Ese proxy también forma parte del sistema.    
+
+Por otra parte, la recepción del vídeo por parte del Dashboard el C# tampoco es fáci. La codificación en C# de las operaciones para establecer la conexión son complejas y no hay buena información al respecto. Es más fácil que la conexión y recepción la realice un script de Python que activa el dashboard en C# y que facilite el stream recibido al dashboard para que éste lo muestre al usuario.   
+
+Finalmente, tampoco es sencillo hacer que el stream de video se muestre en el cliente web de la WebApp.    
+
+En todo caso, en este repositorio hay abundante material que puede resultar de ayuda para resolver estos retos.  
+
+El uso del micrófono del dispositivo móvil para capturar la voz y controlar el dron con ella plantea el reto de que debe hacerse en modo seguro, es decir, con HTTPS y no con HTTP. Esto es así porque tratandose de información privada del usuario (su voz) los navegadores exigen que la información se transmita encriptada, lo cual requiere del uso de certificados que implementen claves públicas y privadas. Lo mismo pasaría si quisiésemos capturar información de otros sensores del movil, como por ejemplo, la imagen de la cámara o la geolocalización del móvil. Aunque resolver la cuestion solo requiere generar los certificados necesarios (cosa muy sencilla) y añadir unas pocas líneas de código los conceptos que hay detrás son complejos, aunque muy interesantes. En este repositorio hay material abundante que resultará de ayuda para aprender los conceptos clave y abordar el reto.
+
 
 
 
