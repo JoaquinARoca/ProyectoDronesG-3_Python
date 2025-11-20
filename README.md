@@ -29,7 +29,8 @@ Git y GitHub son herramientas que facilitan la gestión de versiones, el manteni
 
 En este vídeo se explica lo esencial para instalarse las herramientas y entender los principios de funcionamiento:   
 
-[![](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DI_fQlby426k)](https://www.youtube.com/playlist?list=PLj_C4NVXL2Sgq1N5G1MGbSjsXUIVGZ4S3)
+[![](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DI_fQlby426k)](https://www.youtube.com/playlist?list=PLj_C4NVXL2Sgq1N5G1MGbSjsXUIVGZ4S3)    
+
 Git puede instalarse desde esta página:   
 https://git-scm.com/downloads
 
