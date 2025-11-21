@@ -53,14 +53,13 @@ https://visualstudio.microsoft.com/es/downloads/
 
 
 ### 3.5 Repo taller teleco-renta, que incluye una breve descripción de cómo es el dron    
-En este repositorio puede encontrarse una guía que permite iniciarse en el uso de Mission Planner. También contiene una descripción de los aspectos más básicos del dron en el que se basa el proyecto a desarrollar.  
- 
+En este repositorio [![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-Tutorial_MissionPlanner-blue.svg)](https://github.com/dronsEETAC/telecoRenta_taller_de_drones.git)  puede encontrarse una guía que permite iniciarse en el uso de Mission Planner. También contiene una descripción de los aspectos más básicos del dron en el que se basa el proyecto a desarrollar.  
+
 ### 3.6 Librería DronLink    
-Esta librería facilita la programación en Python de las operaciones necesarias para controlar el dron. Todos los detalles pueden encontrarse en este repositorio. Es importante leer en detalle el apartado en el que se describe el modelo de programación. También pueden ser de utilidad los diferentes programas de test que ilustran la manera de usar las diferentes funciones de la librería.    
+Esta librería facilita la programación en Python de las operaciones necesarias para controlar el dron. Todos los detalles pueden encontrarse en este repositorio [![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-DronLink-blue.svg)](https://github.com/dronsEETAC/DronLink.git). Es importante leer en detalle el apartado en el que se describe el modelo de programación. También pueden ser de utilidad los diferentes programas de test que ilustran la manera de usar las diferentes funciones de la librería.    
 
 ### 3.7 Librería csDronLink    
-Esta es una implementación de DronLink para C#. Toda la información (incluyendo ejemplos de uso) puede encontrarse en este repositorio. Es importante tener en cuenta que esta librería está menos desarrollada que DronLink y tiene menos funcionalidades.    
-[![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-Flying_Indoor-blue.svg)](https://github.com/dronsEETAC/DashIndoor.git) 
+Esta es una implementación de DronLink para C#. Toda la información (incluyendo ejemplos de uso) puede encontrarse en este repositorio [![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-csDroneLink-blue.svg)](https://github.com/dronsEETAC/csDroneLink.git). Es importante tener en cuenta que esta librería está menos desarrollada que DronLink y tiene menos funcionalidades.    
 
 ## 4. Versión 1    
 
