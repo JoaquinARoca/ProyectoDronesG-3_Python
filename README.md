@@ -75,7 +75,7 @@ En un escenario local la estación de tierra que controla el dron está directam
 Veamos dos casos de estación de tierra, una implementada en Python y otra en C#.    
 
 #### 4.1.1 Estación de tierra en Python para el escenario local
-La estación de tierra en Python tiene una interfaz de usuario como la que se muestra en la imagen.    
+EL fichero *DashboardLocalPython.py* contiene el código de una estación de tierra en Python que tiene una interfaz de usuario como la que se muestra en la imagen.    
  
 <img width="272" height="511" alt="image" src="https://github.com/user-attachments/assets/6ef6efb5-aca7-46d2-9e91-6910a030900c" />   
  
@@ -85,7 +85,7 @@ Cuando se pulsa alguno de los botones de la interfaz, el programa usa la funció
    
 Es importante observar lo que ocurre al pulsar el botón de despegar. Se hace una llamada no bloqueante a la función correspondiente de la librería y se indica también una función de callback que la librería ejecutará cuando el dron haya alcanzado la altura de despegue. Puesto que la llamada es no bloqueante, la interfaz gráfica sigue operativa durante el despegue y, por tanto, pueden verse los datos de telemetría (por ejemplo, la altura del dron), si se piden esos datos clicando el botón correspondiente. La función de callback se limita a poner en color verde el botón para indicar visualmente que el dron ya ha alcanzado la altura esperada.    
  
-En cambio, los botones de aterrizaje y RTL no tienen ese comportamiento. Al pulsar el botón de aterrizaje el dron efectivamente inicia el aterrizaje, pero al haber usado una llamada bloqueante, la interfaz gráfica queda congelada hasta que el dron está en tierra. Eso impide, por ejemplo, observan cómo cambia la altura del dron durante el aterrizaje.    
+En cambio, los botones de aterrizaje y RTL no tienen ese comportamiento. Al pulsar el botón de aterrizaje el dron efectivamente inicia el aterrizaje, pero al haber usado una llamada bloqueante, la interfaz gráfica queda congelada hasta que el dron está en tierra. Eso impide, por ejemplo, observar cómo cambia la altura del dron durante el aterrizaje.    
  
 Los 9 botones de navegación permiten hacer que el dron navegue en cualquiera de las direcciones indicadas (Norte, Sur, etc). El dron navegará en la dirección elegida hasta que se pulse el botón correspondiente a otra dirección o el botón de Stop (o aterrizaje o RTL).    
   
@@ -97,7 +97,7 @@ Se proponen lo siguientes ejercicios:
    
 #### 4.1.2 Estación de tierra en C# para el escenario local    
  
-Esta versión está hecha en C# usando Windows Forms. La interfaz gráfica se muestra en la figura. Funcionalmente es prácticamente igual que la estación de tierra en Python. En este caso, el usuario puede especificar la altura de despegue, la operación de despegue realiza el armado del dron antes del despegue y entre los datos de telemetría se incluye la posición del dron (latitud y longitud).   
+La carpeta *DashboardLocalCsharp* contiene una aplicación en Visual C# con Windows Forms. La interfaz gráfica se muestra en la figura. Funcionalmente es prácticamente igual que la estación de tierra en Python. En este caso, el usuario puede especificar la altura de despegue, la operación de despegue realiza el armado del dron antes del despegue y entre los datos de telemetría se incluye la posición del dron (latitud y longitud).   
   
 <img width="436" height="334" alt="image" src="https://github.com/user-attachments/assets/4f2c31cb-ef7f-4e41-b947-60bdbebb7f60" />
 
@@ -129,13 +129,13 @@ La comunicación usando MQTT requiere de la intervención de un agente software 
  
 #### 4.2.1 Un autopilotService    
  
-El código autopilotService.py implemente un posible servicio de autopiloto. Este código usa la librería DronLink para realizar una variedad de operaciones con el dron, a petición de los clientes que se conecten. El programa se conecta al bróker Hivemq y se suscribe a todas las publicaciones que tengan un topic con el formato:   
+El código *autopilotService.py* implementa un posible servicio de autopiloto. Este código usa la librería DronLink para realizar una variedad de operaciones con el dron, a petición de los clientes que se conecten. El programa se conecta al bróker Hivemq y se suscribe a todas las publicaciones que tengan un topic con el formato:   
 ```
  '+/autopilotServiceDemo/#'
 ```
-Esto indica que el topic puede empezar con cualquier palabra (que indica de dónde viene la publicación) y que puede acabar con cualquier texto (que contendrá la especificación de la operación que debe realizar el servicio.    
+Esto indica que el topic puede empezar con cualquier palabra, que especifica de dónde viene la publicación, y que puede acabar con cualquier texto, que contendrá la especificación de la operación que debe realizar el servicio.    
  
-Cuando el bróker recibe una publicación cuyo topic tiene el formato especificado reenvía la publicación al servicio y éste ejecuta la función on_message. En esa función se extrae del topic el origen de la publicación, la operación solicitada (command) y se usa la librería DronLink para realizar la operación.    
+Cuando el bróker recibe una publicación cuyo topic tiene el formato especificado reenvía la publicación al servicio y éste ejecuta la función *on_message*. En esa función se extrae del topic el origen de la publicación, la operación solicitada (command) y se usa la librería DronLink para realizar la operación.    
  
 En algunos casos, al completar la operación solicitada, el servicio publica un mensaje para avisar al cliente de tal circunstancia. Por ejemplo, al completar la operación de despegue, publica el mensaje:   
 ```
@@ -148,7 +148,7 @@ En el caso de que se soliciten datos de telemetría, el autopilotService publica
 ```
 #### 4.2.2 Dashboard global en Python    
  
-Este dashboard es un cliente que interacciona con el autopilotService. Tiene una interfaz gráfica prácticamente igual al dashboard local. Al iniciar la ejecución se conecta al bróker Hivemq y se suscribe a todos los mensajes cuyo topic sea:    
+EL fichero *DashboardGlobalPython.py* contiene el código de una estación de tierra que interactura con el servicio de autopiloto. Tiene una interfaz gráfica prácticamente igual al dashboard local. Al iniciar la ejecución se conecta al bróker Hivemq y se suscribe a todos los mensajes cuyo topic sea:    
 ```
 'autopilotServiceDemo/interfazGlobal/#'
 ```
@@ -169,7 +169,7 @@ Se proponen los siguientes ejercicios:
 
 #### 4.2.3 WebApp    
  
-Una de las características de las aplicaciones de estación de tierra a las que nos hemos referido en los apartados anteriores es que deben ser instaladas en los dispositivos en las que se van a ejecutar (por ejemplo, un portátil). Eso no es un problema porque las aplicaciones están hechas para eso, para ser instaladas.    
+Una de las características de las aplicaciones de estación de tierra a las que nos hemos referido en los apartados anteriores es que deben ser instaladas en los dispositivos en los que se van a ejecutar (por ejemplo, un portátil). Eso no es un problema porque las aplicaciones están hechas para eso, para ser instaladas.    
  
 No obstante, hay situaciones en las que puede ser interesante poder interactuar con el dron desde un dispositivo móvil sin tener que instalar ninguna aplicación específica para ello. Ese es el caso de demostraciones en el DronLab para que los visitantes puedan interactuar con el dron desde sus dispositivos móviles sin tener que pedirles que instalen cosas. Para este propósito las webapps son ideales.    
  
@@ -177,10 +177,10 @@ Una webapp es un servidor que sirve páginas web, igual que el servidor que sirv
  
 Para implementar webapps usaremos el framework Flask. En su versión más básica, la webapp se compone de un servidor en Python que debe ejecutarse en una máquina con IP pública y un fichero HTML (cliente web) que contiene la página web que se enviará al dispositivo móvil que se conecte. En ese fichero se indican los elementos gráficos de la página codificados en HTML (botones, cuadros de texto, etc), los estilos gráficos codificados en CSS (colores, tamaños, etc.) y el código que debe ejecutar el navegador, escrito en Javascript (por ejemplo, lo que hay que hacer cuando el usuario pulse un botón).    
 
-El fichero serverHTTP.py y el fichero indexHTTP que está en la carpeta templates es constituyen un ejemplo de una webapp muy sencilla, cuya interfaz gráfica se muestra en la imagen.    
+El fichero *serverHTTP.py* y el fichero *indexHTTP.html* que está en la carpeta *templates* constituyen un ejemplo de una webapp muy sencilla, cuya interfaz gráfica se muestra en la imagen.    
 <img width="343" height="558" alt="image" src="https://github.com/user-attachments/assets/c94439d8-8472-4cde-97ae-8c3bf1eb815f" />
 
-Cuando se pulsa uno de los botones el código javascript realiza una operación HTTP de tipo post. Al recibir esa petición, el servidor hace la publicación correspondiente en el bróker para avisar al autopilotService.    
+Cuando se pulsa uno de los botones el código javascript realiza una operación HTTP de tipo POST. Al recibir esa petición, el servidor hace la publicación correspondiente en el bróker para avisar al autopilotService.    
  
 Puesto que el protocolo HTTP se basa en el mecanismo de petición/respuesta, la recepción de los datos de telemetría en el cliente web es un poco más compleja que en casos anteriores. Cuando el cliente se conecta (envía el POST correspondiente) el servidor publica la orden de conectarse y la de recibir datos de telemetría. A partir de ese momento recibirá del servicio los datos de telemetría (a través del bróker) y se irá guardando los valores recibidos en el ultimo paquete de telemetría (solo la altitud y el estado). Por su parte, el cliente web realizará un GET periódicamente solicitando al servidor los datos de telemetría, que recibirá como respuesta al GET (solo altitud y estado).   
  
@@ -193,7 +193,7 @@ El mecanismo de petición/respuesta que caracteriza el protocolo HTTP entre el c
  
 Una mejora significativa se obtiene si el script del cliente web, en lugar de hacer peticiones HTTP, hace publicaciones y suscripciones directamente en el bróker que hace de intermediario en la comunicación por MQTT. De esta manera, los paquetes de telemetría que publica el autopilotService llegan también al navegador del móvil igual que a todos los demás dispositivos que se hubieran suscrito.   
  
-Los ficheros serverMQTT.py y indexMQTT.html (en la carpeta templates) implementan esta segunda versión de la webapp, que tiene la misma interfaz gráfica. En este caso, el código del servidor es extraordinariamente simple, porque solo tiene que servir el código del cliente web (el fichero indexMQTT.html) a los clientes que se conectan. Es el cliente web el que se conecta al bróker, se suscribe a los mensajes del autopilotService y publica las ordenes según el botón que pulsa el usuario.    
+Los ficheros *serverMQTT.py* y *indexMQTT.html* (también en la carpeta *templates*) implementan esta segunda versión de la webapp, que tiene la misma interfaz gráfica. En este caso, el código del servidor es extraordinariamente simple, porque solo tiene que servir el código del cliente web (el fichero *indexMQTT.html*) a los clientes que se conectan. Es el cliente web el que se conecta al bróker, se suscribe a los mensajes del autopilotService y publica las ordenes según el botón que pulsa el usuario.    
  
 Se proponen los siguientes ejercicios:    
  
@@ -203,21 +203,21 @@ Se proponen los siguientes ejercicios:
 
 ### 4.3 Videostreaming   
  
-Muchas de las aplicaciones de los drones requieren la captura y procesado de imágenes, como, por ejemplo, el stream de video. Naturalmente, esto requiere que el dron tenga instalada una cámara abordo y un trasmisor que envíe la señal de vídeo a la estación de tierra, en la que debe hacer un receptor que permita entregar ese stream de video a la aplicación que lo necesite.    
+Muchas de las aplicaciones de los drones requieren la captura y procesado de imágenes, como, por ejemplo, el stream de video. Naturalmente, esto requiere que el dron tenga instalada una cámara abordo y un trasmisor que envíe la señal de vídeo a la estación de tierra, en la que debe haber un receptor que permita entregar ese stream de video a la aplicación que lo necesite.    
  
 De nuevo, interesa que el stream de video sea capturado por un servicio (cameraService) que tendrá acceso al receptor y que luego pueda entregarlo al cliente que lo solicite (por ejemplo, un Dashboard como los descritos antes).    
  
-Para implementar la comunicación entre el cameraService y el cliente teóricamente podría usarse MQTT, de manera que el servicio publicaría periódicamente los frames del stream de video que recibiría el cliente para mostrarlos al usuario. Sin embargo, MQTT no está pensado para transmitir datos voluminosos (como los frames) con mucha frecuencia (la necesaria en un stream de video en tiempo real).    
+Para implementar la comunicación entre el cameraService y el cliente teóricamente podría usarse MQTT, de manera que el servicio publicaría periódicamente los frames del stream de video. Las aplicaciones suscritas recibirías esos frames para mostrarlos al usuario. Sin embargo, MQTT no está pensado para transmitir datos voluminosos (como los frames) con mucha frecuencia (la necesaria en un stream de video en tiempo real).    
  
-Una alternativa mucho mejor es enviar el stream de video usando WebRTC. Este mecanismo trabaja sobre UDP/IP y, por tanto, no necesita espera las  confirmaciones de paquetes típicas del protocolo TCP/IP, que es el que usa MQTT. El resultado es una mucho mayor fluidez en la transmisión del stream de video.    
+Una alternativa mucho mejor es enviar el stream de video usando WebRTC. Este mecanismo trabaja sobre UDP/IP y, por tanto, no introduce los retardos típicos del protocolo TCP/IP, que es el que usa MQTT, y que son necesarios para controlar el flujo y asegurar que no se pierde información durante la comunicación. El resultado de utilizar WebRTC es una mucho mayor fluidez en la transmisión del stream de video.    
  
 Cuando se usa WebRTC, uno de los agentes implicados (emisor o receptor) debe actuar como servidor y el otro como cliente. El cliente se conecta al servidor usando la IP de éste. Para establecer la conexión el cliente y servidor intercambian algunos mensajes usando un websocket. Una vez establecida la conexión el emisor envía el stream de video que llegará al receptor con menor retraso y mejor fluidez, como corresponde al uso de UDP en vez de TCP, aunque con posibles pérdidas de paquetes que, si bien serían inadmisibles si se están enviando instrucciones, no van a afectar significativamente a la experiencia de usuario en el caso de video streaming.    
  
-El fichero cameraService.py contiene el código necesario para capturar el stream de video usando la librería OpenCV y emitirlo por WebRTC.  El código captura el video de la webcam conectada al portátil en el que se ejecute, pero cambiando el valor de camera_id puede capturar el video que llega al receptor que tenga conectado. Al ponerse en marcha, el servicio queda a la espera de que algún cliente solicite el stream de video. Entonces se inicia un sencillo protocolo de coordinación a través de un web socket hasta que puestos de acuerdo se inicia la trasmisión del stream de video, frame a frame (en la función recv).    
+El fichero *cameraService.py* contiene el código necesario para capturar el stream de video usando la librería OpenCV y emitirlo por WebRTC.  El código captura el video de la webcam conectada al portátil en el que se ejecute, pero cambiando el valor de camera_id puede capturar el video que llega al receptor que tenga conectado. Al ponerse en marcha, el servicio queda a la espera de que algún cliente solicite el stream de video. Entonces se inicia un sencillo protocolo de coordinación a través de un websocket de manera que, una vez puestos de acuerdo, se inicia la trasmisión del stream de video, frame a frame (en la función *recv*).    
  
-El fichero DashboardLocalConVideoStream.py contiene el código de un dashboard que es básicamente igual que el descrito en el apartado x, al que se le ha añadido un botón para conectarse al CameraService y recibir el stream de video para mostrarlo al usuario. El código está preparado para el caso de que tanto el dashboard como el servicio se ejecuten en el mismo portátil (que debe tener una webcam). El sistema funcionaría igual si el servicio de cámara y el dashboard se ejecutan en portátiles diferentes pero conectados a la misma red de área local. En ese caso, hay que sustituir la palabra localhost en la función videoReceiver del Dashboard por la IP del servicio dentro de la red de área local.    
+El fichero *DashboardLocalConVideoStream.py* contiene el código de un dashboard que es básicamente igual que el descrito en el apartado 4.1.1, al que se le ha añadido un botón para conectarse al CameraService y recibir el stream de video para mostrarlo al usuario. El código está preparado para el caso de que tanto el dashboard como el servicio se ejecuten en el mismo portátil (que debe tener una webcam). El sistema funcionaría igual si el servicio de cámara y el dashboard se ejecutan en portátiles diferentes pero conectados a la misma red de área local. En ese caso, hay que sustituir la palabra *localhost* en la función *videoReceiver* del Dashboard por la IP del servicio dentro de la red de área local.    
  
-La transmisión de video por WebRTC puede funcionar también en el caso de que el servicio y el dashboard estén conectados a Internet pero no en la misma red de área local. Si el servicio no está conectado a una IP pública entonces la coordinación entre servicio y dashboard debe realizarse a través de un proxy que si tenga una IP pública conocida por ambos. Pero ese planteamiento se escapa del alcance de la versión 1 y puede quedar como objetivo en las siguientes versiones.
+La transmisión de video por WebRTC puede funcionar también en el caso de que el servicio y el dashboard estén conectados a Internet pero no en la misma red de área local. Si el servicio no está conectado a una IP pública entonces la coordinación entre servicio y dashboard debe realizarse a través de un proxy que sí tenga una IP pública conocida por ambos. Pero ese planteamiento se escapa del alcance de la versión 1 y puede quedar como objetivo en las siguientes versiones.
 
 ### 4.4 Reconocimiento de objetos    
  
@@ -225,7 +225,7 @@ Es habitual que el stream de video se requiera para reconocer objetos en la imag
  
 Es muy fácil experimentar con la tecnología del reconocimiento de objetos usando alguna red neuronal previamente entrenada y de libre acceso. Un ejemplo es la red neuronal capaz de reconocer cualquiera de los 80 tipos de objetos del data set COCO (Common Objects in Context). Entre esos objetos hay: banana, coche, perro, reloj, donut y así hasta 80.    
  
-El fichero DashboardLocalConDeteccion.py contiene el código de un DashBoard que puede activar la detección de tres tipos de objetos: bananas, pizzas y relojes. El código es muy similar al Dashboard anterior, que mostraba el stream de video, pero se le ha añadido el código que usa la red neuronal para detectar los objetos en los frames que recibe. La mecánica es sencilla. El detector de objetos se ha implementado en la clase Detector, que usa la red neuronal pre-entrenada. Cada vez que se recibe un frame se llama a la función de detección indicándole el identificador del objeto que se quiere identificar (cada uno de los 80 objetos del data set de COCO tiene un identificador). El detector retorna una indicación de si lo ha detectado o no y en caso afirmativo las coordenadas del rectángulo dentro del frame en el que se ubica el objeto identificado. El dashboard usa esa información para añadir el rectángulo al frame y mostrarlo al usuario, tal y como muestra la figura.    
+El fichero *DashboardLocalConDeteccion.py* contiene el código de un DashBoard que puede activar la detección de tres tipos de objetos: bananas, pizzas y relojes. El código es muy similar al Dashboard anterior, que mostraba el stream de video, pero se le ha añadido el código que usa la red neuronal para detectar los objetos en los frames que recibe. La mecánica es sencilla. El detector de objetos se ha implementado en la clase *Detector*, que usa la red neuronal pre-entrenada. Cada vez que se recibe un frame se llama a la función de detección indicándole el identificador del objeto que se quiere identificar (cada uno de los 80 objetos del data set de COCO tiene un identificador). El detector retorna una indicación de si lo ha detectado o no y en caso afirmativo las coordenadas del rectángulo dentro del frame en el que se ubica el objeto identificado. El dashboard usa esa información para añadir el rectángulo al frame y mostrarlo al usuario, tal y como muestra la figura.    
 
 <img width="795" height="575" alt="image" src="https://github.com/user-attachments/assets/dce64e9a-1060-4112-817b-4df7874e2ff3" />
 
@@ -239,15 +239,15 @@ Se proponen los siguientes ejercicios:
 
 
 ## 5. Versión 2
-Lo que hemos llamado versión 1 no es en realidad una versión de nada. Se trata de diferentes módulos desarrollados de manera independiente para aprender conmceptos y herramientas. Ahora ha llegado el momento de crear una verdadera versión de un sistema en el que los díferentes módulos estén interconectados y puedan colaborar en la tarea de controlar el dron.    
+Lo que hemos llamado versión 1 no es en realidad una versión de nada. Se trata de diferentes módulos desarrollados de manera independiente para aprender conceptos y herramientas. Ahora ha llegado el momento de crear una verdadera versión de un sistema en el que los díferentes módulos estén interconectados y puedan colaborar en la tarea de controlar el dron.    
 
 En la versión 2 habrá solo 3 modulos: el dashboard en python, el dashboard en C# y una webapp, todos ellos conectados a Internet. Además, ampliaremos las funcionalidades de todos ellos con, por ejemplo, mapas geolocalizados o control del dron por voz.    
 
-Además, la vesión 2 va a estar mucho menos guiada. Será necesario buscar información, probar y buscar más. El uso de ChatGPT (o similar) será de mucha ayuda, aunque se espera que la versión 2 se construya sobre la base de lo aprendido en la versión 1, y no con códigos muy diferentes, proporcionados por la IA, que funcionas pero a penas se entienden. En cualquier caso, en el apartado 5.2 se proporcionan algunas pistas y se sugieren algunos recursos que pueden ser de ayuda.    
+Además, la vesión 2 va a estar mucho menos guiada. Será necesario buscar información, probar y buscar más. El uso de ChatGPT (o similar) será de mucha ayuda, aunque se espera que la versión 2 se construya sobre la base de lo aprendido en la versión 1, y no con códigos muy diferentes, proporcionados por la IA, que funcionen pero apenas se entiendan. En cualquier caso, en el apartado 5.2 se proporcionan algunas pistas y se sugieren algunos recursos que pueden ser de ayuda.    
  
 Será también muy adecuado repartir trabajo entre los miembros del equipo para poder cumplir con el plazo de entrega de esta versión.    
 
-### 5.1 Requisitos específicos de esta versión    
+### 5.1 Requisitos específicos de la versión 2       
  
 Veamos los requisitos de cada uno de los tres módulos del sistema a desarrollar.    
 
@@ -257,9 +257,9 @@ Veamos los requisitos de cada uno de los tres módulos del sistema a desarrollar
 2. Debe poder trabajar en modo local o en modo global, según indique el usuario (quizá con un botón).
 3. Si se pone marcha en modo local entonces debe activar el servicio de autopiloto y el servicio de cámara. 
 4. Siempre tiene que haber una (y solo una) instancia del dashboard que se ponga en marcha en modo local, en el portátil que tenga la radio de telemetría y el receptor del vídeo del dron. 
-5. Pueden ponerse en marcha una o varias instancias del dashboard en modo global que interactuaran con el servicio de autopiloto por MQTT y con el servicio de cámara por WebRTC.
+5. Pueden ponerse en marcha una o varias instancias del dashboard en modo global que interactuarán con el servicio de autopiloto por MQTT y con el servicio de cámara por WebRTC.
 6. Tanto en modo local como en modo global, el dashboard debe mostrar al usuario un mapa geolocalizado que muestre la posición en la que está el dron en cada momento, igual que lo hace Mission Planner.
-7. El usuario de poder interactuar con el dron a través del mapa, por ejemplo clicando en un punto del mapa para que el dron se dirija a ese punto.
+7. El usuario debe poder interactuar con el dron a través del mapa, por ejemplo clicando en un punto del mapa para que el dron se dirija a ese punto.
 8. Tanto en modo local como en modo global el usuario debe poder solicitar el reconocimiento de objetos en el stream de video. Incluso debe poder solicitar que se reconozcan varios tipos de objetos simultaneamente, seleccionados de entre un subconjunto del data set de COCO.
 9. El servicio de cámara debe suministrar el stream de video por WebRTC a todos los módulos que lo soliciten.
 
@@ -289,7 +289,7 @@ Finalmente, tampoco es sencillo hacer que el stream de video se muestre en el cl
 
 En todo caso, en este repositorio [![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-Video_Streaming-blue.svg)](https://github.com/dronsEETAC/Tutorial_VideoStreaming.git) hay abundante material que puede resultar de ayuda para resolver estos retos.   
  
-El uso del micrófono del dispositivo móvil para capturar la voz y controlar el dron con ella plantea el reto de que debe hacerse en modo seguro, es decir, con HTTPS y no con HTTP. Esto es así porque tratandose de información privada del usuario (su voz) los navegadores exigen que la información se transmita encriptada, lo cual requiere del uso de certificados que implementen claves públicas y privadas. Lo mismo pasaría si quisiésemos capturar información de otros sensores del movil, como por ejemplo, la imagen de la cámara o la geolocalización del móvil. Aunque resolver la cuestion solo requiere generar los certificados necesarios (cosa muy sencilla) y añadir unas pocas líneas de código los conceptos que hay detrás son complejos, aunque muy interesantes. Esta colección de vídeos [![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-WebApps_seguras-pink.svg)](https://www.youtube.com/playlist?list=PLyAtSQhMsD4qbgXn6jheozHsjU4GRCqtv) ayuda a abordar la cuestión.
+El uso del micrófono del dispositivo móvil para capturar la voz y controlar el dron con ella plantea el reto de que debe hacerse en modo seguro, es decir, con HTTPS y no con HTTP. Esto es así porque tratandose de información privada del usuario (su voz) los navegadores exigen que la información se transmita encriptada, lo cual requiere del uso de certificados que implementen claves públicas y privadas. Lo mismo pasaría si quisiésemos capturar información de otros sensores del movil, como por ejemplo, la imagen de la cámara o la geolocalización del móvil. Aunque resolver la cuestion solo requiere generar los certificados necesarios (cosa muy sencilla) y añadir unas pocas líneas de código, los conceptos que hay detrás son complejos, aunque muy interesantes. Esta colección de vídeos [![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-WebApps_seguras-pink.svg)](https://www.youtube.com/playlist?list=PLyAtSQhMsD4qbgXn6jheozHsjU4GRCqtv) ayuda a abordar la cuestión.
 
 
 
