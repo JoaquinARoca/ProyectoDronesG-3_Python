@@ -22,6 +22,10 @@ La versión 4 será la versión final con todas las funcionalidades previstas. A
 
 ## 2. Criterios de evaluación    
 
+ - 50% Proyecto
+ - 20% Examen 1
+ - 20% Examen 2
+ - 10% Actitud y Participación
 
 ## 3. Recursos    
 ### 3.1 Git y GitHub   
