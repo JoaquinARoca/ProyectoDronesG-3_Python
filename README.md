@@ -70,6 +70,60 @@ Esta es una implementación de DronLink para C#. Toda la información (incluyend
 Esta es una lectura para aprender lo básico sobre las diferentes tecnologías y herramientas relacionadas con las comunicaciones entre los diferentes elementos que pueden intervenir en el proyecto a desarrollar.   
 [comunicacionesEcosistema.pdf](https://github.com/user-attachments/files/23694565/comunicacionesEcosistema.pdf)
 
+### 3.9 Conexión con el dron real   
+La mayor parte del tiempo de desarrollo trabajaremos con el simulador SITL. Pero lógicamente, en algún momento hay que poner a prueba los programas con el dron real. Veamos todo lo que hay que saber sobre esta cuestión.   
+ 
+El portátil en el que se van a ejecutar nuestros programas debe conectarse con el dron a través de la radio de telemetría, que debe estar conectada a uno de los puertos USB del portátil. Consultando el Administrador de dispositivos de Windows podemos verificar rápidamente en cuál de los puertos COM está conectada la radio. Entonces, basta sustituir en el programa las siguientes líneas de código:   
+
+```
+connection_string = "tcp:127.0.0.1:5763"
+vehicle = connect (connection_string, wait_ready = True, baud = 115200)
+```
+por estas (suponiendo que la radio de telemetría está en COM12:
+```
+connection_string = "COM12"
+vehicle = connect (connection_string, wait_ready = True, baud = 57600)
+```
+En definitiva cambiamos el string de conexión y la velocidad de transmisión (que es menor cuando se usa la radio de telemetría). Con estos cambios, nuestros programas deberían funcionar igual que lo hacían con el simulador. Habitualmente, las diferencias de comportamiento se deben a las diferentes velocidades con las que ocurren las cosas con el dron real, que podrían dar lugar a errores que no se habían observado con el simulador.   
+
+### 12.2 Conexión simultánea de nuestro programa y Mission Planner    
+
+Es importante comprender que si Mission Planner está conectado al dron a través de la radio de telemetría entonces nuestro programa no podrá conectarse al dron porque el puerto del portátil (COM12 en el ejemplo anterior) ya está ocupado. Por la misma razón, si nuestro programa se está ejecutando no podremos conectar Mission Planner al dron (puerto ocupado).    
+ 
+A veces no tendremos necesidad de tener conectados al dron simultáneamente nuestro programa y Mission Planner. Pero otras veces puede ser conveniente, por ejemplo, si estamos probando un plan de vuelo que se envía al dron por programa . Puede ocurrir que algo falle y queramos enviar un RTL al dron para que regrese inmediatamente, lo cual haremos desde Mission Planner.    
+  
+Para poder conectar al dron simultáneamente nuestro programa y Mission Planner necesitamos un pequeño proxy que haga de intermediario entre los diferentes elementos, tal y como muestra la figura.    
+<img width="497" height="260" alt="image" src="https://github.com/user-attachments/assets/58612ff5-04c7-43f0-8e17-e3891b4a576a" />     
+
+El proxy no es más que un servidor que se conecta por un lado al dron, a través de la radio de telemetría (en el puerto que corresponda) y por otro lado a los programas que necesitan enviar/recibir información al/del dron. La figura indica que el proxy ofrece dos puertos UDP. Mission Planner se conectará al puerto 14550  y nuestro programa al puerto 14551. El proxy se encargará de encaminar adecuadamente la información entre esos elementos, de manera que podremos tener conectados simultáneamente Mission Planner y nuestro programa.     
+ 
+MAVProxy es una herramienta gratuita que nos permite hacer exactamente eso: poner en marcha el proxy que necesitamos. Toda la información sobre esta herramienta pueden encontrarse aquí:     
+  
+<img width="284" height="123" alt="image" src="https://github.com/user-attachments/assets/402a6dd0-8c98-48ac-87c8-03aa6a04269e" />   
+   
+[MAVProxy — MAVProxy documentation (ardupilot.org)](https://ardupilot.org/mavproxy/)
+
+La puesta en marcha es muy sencilla. Hay que instalar el software en el portátil siguiendo las instrucciones del apartado Download and Installation. Después, debe abrirse un terminal de PowerShell y escribir el siguiente comando:     
+```
+mavproxy --master=com12 --out=udp:127.0.0.1:14550 --out=udp:127.0.0.1:14551
+```
+Ahora ya tenemos en marcha el proxy y podemos conectar Mission Planner a uno de los puertos UDP y nuestro programa al otro (con el connextion string correspondiente al puerto UDP) para interactuar simultáneamente con el dron a través de la radio de telemetría. El video siguiente muestra cómo se hace este proceso.    
+
+[![](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D-wshxqRHUCY)](https://www.youtube.com/watch?v=-wshxqRHUCY)
+
+El vídeo muestra como:      
+
+-  Se pone en marcha Mission Planner    
+-  Se conecta al dron a través del puerto COM12 en el que está conectada la radio de telemetría    
+-  Intentamos conectar también el programa, ajustando la velocidad de transmisión    
+-  La conexión del programa fracasa porque el puerto COM12 está ya ocupado por Mission Planner 
+-  Desconectamos Mission Planner para dejar libre el puerto y conectamos (ahora si) nuestro programa  
+-  Abrimos un terminal de PowerShell y ponemos en marcha el proxy    
+-  Ahora conectamos Mission Planner por UDP al puerto 14551 y nuestro programa al puerto 14550    
+-  Finalmemnte ya tenemos a ambos conectados al dron    
+ 
+Obsérvese que en el momento de conectar Misión Planner al puerto UDP el autor del vídeo tiene alguna vacilación porque Mission Planner ya estaba conectado. Ha realizado algunas operaciones para desconectarlo y poder mostrar la operación de conexión, en la que hay que especificar el puerto al que debe conectarse. Obsérvese también que se han asignado los puertos UDP en el orden contrario al de la figura. Esa cuestión es indiferente.
+
 ## 4. Versión 1    
 
 ### 4.1 Escenario local    
