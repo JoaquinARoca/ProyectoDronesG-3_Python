@@ -58,6 +58,9 @@
         <!-- Botón Aterrizar -->
         <button id="botonAterrizar" class="boton" onclick="aterrizarDron()">Aterrizar Dron</button>
 
+        <!-- Botón RTL -->
+        <button id="botonRTL" class="boton" onclick="rtlDron()">RTL (Return)</button>
+
         <!-- Botones de dirección -->
         <div class="direction">
             <div onclick="moverDron('NorthWest')" class="box">NW</div>
@@ -137,6 +140,15 @@ function moverDron(dir) {
     post("/move", { direction: dir });
 }
 
+// Función mínima RTL: envía POST /rtl y marca el botón en amarillo (feedback inmediato)
+function rtlDron() {
+    const botonRTL = document.getElementById('botonRTL');
+    // marcar amarillo inmediatamente
+    botonRTL.classList.remove('boton-verde');
+    botonRTL.classList.add('boton-amarillo');
+    post('/rtl').catch(() => { alert('Error al enviar comando RTL'); });
+}
+
 // ------------------------------------
 // TELEMETRÍA (Polling cada 500ms)
 // ------------------------------------
@@ -168,6 +180,16 @@ setInterval(() => {
                 aterrizaje_iniciado = false;
             }
 
+            // Manejo sencillo del botón RTL: si el dron está retornando, marcamos amarillo; si está connected y el botón estaba amarillo, lo ponemos verde
+            const botonRTL = document.getElementById('botonRTL');
+            if (estado === 'returning') {
+                botonRTL.classList.remove('boton-verde');
+                botonRTL.classList.add('boton-amarillo');
+            } else if (estado === 'connected' && botonRTL.classList.contains('boton-amarillo')) {
+                botonRTL.classList.remove('boton-amarillo');
+                botonRTL.classList.add('boton-verde');
+            }
+
         })
         .catch(() => {});
 }, 500);
@@ -176,4 +198,3 @@ setInterval(() => {
 
 </body>
 </html>
-

@@ -110,6 +110,13 @@ def http_move():
     mqtt_client.publish(topic, str(direction))
     return ("", 204)
 
+@app.route("/rtl", methods=["POST"])
+def http_rtl():
+    # Publicar comando RTL
+    topic = f"{TOPIC_PREFIX_PUB}/RTL"
+    mqtt_client.publish(topic, "")
+    return ("", 204)
+
 @app.route("/telemetry", methods=["GET"])
 def http_telemetry():
     # Devuelve la última telemetría conocida
