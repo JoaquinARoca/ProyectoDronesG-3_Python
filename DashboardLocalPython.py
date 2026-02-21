@@ -3,16 +3,18 @@
 ###############################
 
 import tkinter as tk
+from tkinter import simpledialog
 from dronLink.Dron import Dron
 
 
 
 def showTelemetryInfo (telemetry_info):
     global heading, altitude, groundSpeed, state
-    global altShowLbl, headingShowLbl, stateShowLbl
+    global altShowLbl, headingShowLbl, stateShowLbl, speedShowLbl
     altShowLbl['text'] = round (telemetry_info['alt'],2)
     headingShowLbl['text'] =  round(telemetry_info['heading'],2)
     stateShowLbl['text'] = telemetry_info['state']
+    speedShowLbl['text'] = round(telemetry_info['groundSpeed'],2)
 
 
 def connect ():
@@ -43,28 +45,51 @@ def inTheAir ():
 
 def takeoff ():
     global dron
+
+    altitude = simpledialog.askfloat(
+        "Altitud de despegue",
+        "Introduce la altitud en metros:\n(Rango: 1-100m)",
+        minvalue=1.0,
+        maxvalue=100.0
+    )
+
+    # Si el usuario cancela el diálogo, no hacemos nada
+    if altitude is None:
+        return
     # despegamos a una altura de 5 metros
     # llamada no bloqueante. Cuando alcance la altura indicada ejecutará la función inTheAir
-    dron.takeOff (5, blocking = False,  callback = inTheAir)
+    alt_int = int (altitude)
+    dron.takeOff (alt_int, blocking = False,  callback = inTheAir)
     takeOffBtn['text'] = 'Despegando...'
     takeOffBtn['fg'] = 'black'
     takeOffBtn['bg'] = 'yellow'
 
-def land ():
-    global dron
-    # llamada bloqueante
-    dron.Land()
+def onLanded():
     landBtn['text'] = 'En tierra'
     landBtn['fg'] = 'white'
     landBtn['bg'] = 'green'
 
-def RTL():
-    global dron
-    # llamada bloqueante
-    dron.RTL()
+def onRTLCompleted():
     RTLBtn['text'] = 'En tierra'
     RTLBtn['fg'] = 'white'
     RTLBtn['bg'] = 'green'
+
+def land ():
+    global dron
+    # llamada no bloqueante con callback
+    dron.Land(blocking=False, callback=onLanded)
+    landBtn['text'] = 'Aterrizando...'
+    landBtn['fg'] = 'black'
+    landBtn['bg'] = 'yellow'
+
+def RTL():
+    global dron
+    # llamada no bloqueante con callback
+    dron.RTL(blocking=False, callback=onRTLCompleted)
+    dron.RTL()
+    RTLBtn['text'] = 'Volviendo...'
+    RTLBtn['fg'] = 'black'
+    RTLBtn['bg'] = 'yellow'
 
 def go (direction, btn):
     global dron, previousBtn
@@ -97,6 +122,12 @@ def changeHeading (event):
     # cambiamos el heading según se haya seleccionado en el slider
     dron.changeHeading(int (gradesSldr.get()))
 
+def changeAltitude (event):
+    global dron
+    global altitudeSldr
+    # cambiamos la altitud según se haya seleccionado en el slider
+    dron.change_altitude(int (altitudeSldr.get()))
+
 def changeNavSpeed (event):
     global dron
     global speedSldr
@@ -107,7 +138,7 @@ def changeNavSpeed (event):
 
 def crear_ventana():
     global dron
-    global  altShowLbl, headingShowLbl,  speedSldr, gradesSldr, stateShowLbl
+    global  altShowLbl, headingShowLbl,  speedSldr, gradesSldr, stateShowLbl, speedShowLbl, altitudeSldr
     global connectBtn, armBtn, takeOffBtn, landBtn, RTLBtn
     global previousBtn # aqui guardaré el ultimo boton de navegación clicado
 
@@ -145,19 +176,26 @@ def crear_ventana():
     gradesSldr = tk.Scale(ventana, label="Grados:", resolution=5, from_=0, to=360, tickinterval=45,
                               orient=tk.HORIZONTAL)
     gradesSldr.grid(row=3, column=0, columnspan=2,padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
+    gradesSldr.set(180)
     gradesSldr.bind("<ButtonRelease-1>", changeHeading)
+
+    # Slider para seleccionar la altitud
+    altitudeSldr = tk.Scale(ventana, label="Altitud (m):", resolution=1, from_=0, to=100, tickinterval=10,
+                              orient=tk.HORIZONTAL)
+    altitudeSldr.grid(row=4, column=0, columnspan=2, padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
+    altitudeSldr.bind("<ButtonRelease-1>", changeAltitude)
 
     # los dos siguientes están en la misma fila están en la misma fila
     landBtn = tk.Button(ventana, text="aterrizar", bg="dark orange", command=land)
-    landBtn.grid(row=4, column=0, padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
+    landBtn.grid(row=5, column=0, padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
 
     RTLBtn = tk.Button(ventana, text="RTL", bg="dark orange", command=RTL)
-    RTLBtn.grid(row=4, column=1, padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
+    RTLBtn.grid(row=5, column=1, padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
 
     # este es el frame para la navegación. Pequeña matriz de 3 x 3 botones
     # con el valor de padx hacemos que se introduzca un espacio en blanco a la derecha,
     navFrame = tk.LabelFrame (ventana, text = "Navegación")
-    navFrame.grid(row=5, column=0, columnspan = 2, padx=50, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
+    navFrame.grid(row=6, column=0, columnspan = 2, padx=50, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
 
     navFrame.rowconfigure(0, weight=1)
     navFrame.rowconfigure(1, weight=1)
@@ -211,20 +249,20 @@ def crear_ventana():
     # slider para elegir la velocidad de navegación
     speedSldr = tk.Scale(ventana, label="Velocidad (m/s):", resolution=1, from_=0, to=20, tickinterval=5,
                           orient=tk.HORIZONTAL)
-    speedSldr.grid(row=6, column=0, columnspan=2, padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
+    speedSldr.grid(row=7, column=0, columnspan=2, padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
     speedSldr.bind("<ButtonRelease-1>", changeNavSpeed)
 
     # botones para pedir/parar datos de telemetría
     StartTelemBtn = tk.Button(ventana, text="Empezar a enviar telemetría", bg="dark orange", command=startTelem)
-    StartTelemBtn.grid(row=7, column=0, padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
+    StartTelemBtn.grid(row=8, column=0, padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
 
     StopTelemBtn = tk.Button(ventana, text="Parar de enviar telemetría", bg="dark orange", command=stopTelem)
-    StopTelemBtn.grid(row=7, column=1, padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
+    StopTelemBtn.grid(row=8, column=1, padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
 
     # Este es el frame para mostrar los datos de telemetría
     # Contiene etiquetas para informar de qué datos son y los valores. Solo nos interesan 3 datos de telemetría
     telemetryFrame = tk.LabelFrame(ventana, text="Telemetría")
-    telemetryFrame.grid(row=8, column=0, columnspan=2, padx=10, pady=10, sticky=tk.N + tk.S + tk.E + tk.W)
+    telemetryFrame.grid(row=9, column=0, columnspan=2, padx=10, pady=10, sticky=tk.N + tk.S + tk.E + tk.W)
 
     telemetryFrame.rowconfigure(0, weight=1)
     telemetryFrame.rowconfigure(1, weight=1)
@@ -232,6 +270,7 @@ def crear_ventana():
     telemetryFrame.columnconfigure(0, weight=1)
     telemetryFrame.columnconfigure(1, weight=1)
     telemetryFrame.columnconfigure(2, weight=1)
+    telemetryFrame.columnconfigure(3, weight=1)
 
     # etiquetas informativas
     altLbl = tk.Label(telemetryFrame, text='Altitud')
@@ -243,6 +282,9 @@ def crear_ventana():
     stateLbl = tk.Label(telemetryFrame, text='Estado')
     stateLbl.grid(row=0, column=2,  padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
 
+    speedLbl = tk.Label(telemetryFrame, text='Velocidad (m/s)')
+    speedLbl.grid(row=0, column=3,  padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
+
     # etiquetas para colocar aqui los datos cuando se reciben
     altShowLbl = tk.Label(telemetryFrame, text='')
     altShowLbl.grid(row=1, column=0, padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
@@ -253,8 +295,10 @@ def crear_ventana():
     stateShowLbl = tk.Label(telemetryFrame, text='', )
     stateShowLbl.grid(row=1, column=2, padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
 
-    return ventana
+    speedShowLbl = tk.Label(telemetryFrame, text='')
+    speedShowLbl.grid(row=1, column=3, padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
 
+    return ventana
 
 if __name__ == "__main__":
     ventana = crear_ventana()
