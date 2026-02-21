@@ -84,6 +84,9 @@
 // FUNCIONES HTTP CLIENT → SERVIDOR
 // ------------------------------------
 
+// Bandera que indica si el usuario ha iniciado un aterrizaje (para evitar que el botón se ponga verde al iniciar la página)
+let aterrizaje_iniciado = false;
+
 function post(url, body = {}) {
     return fetch(url, {
         method: "POST",
@@ -99,20 +102,35 @@ function conectarDron() {
 }
 
 function despegarDron() {
-    const altura = document.getElementById('altura').value;
+    const alturaInput = document.getElementById('altura');
+    const altura = alturaInput.value;
     if (!altura) {
         alert("Ingresa una altura válida");
         return;
     }
 
-    post("/takeoff", { altura })
+    post("/takeoff", { altura: altura })
         .then(() => {
             document.getElementById('botonDespegar').classList.add('boton-amarillo');
+        })
+        .catch(() => {
+            alert('Error al enviar comando de despegue');
         });
 }
 
 function aterrizarDron() {
-    post("/land");
+    // Marcar el botón inmediatamente en amarillo para indicar que el aterrizaje se inicia
+    const botonAterrizar = document.getElementById('botonAterrizar');
+    botonAterrizar.classList.remove('boton-verde');
+    botonAterrizar.classList.add('boton-amarillo');
+
+    // Indicamos que el aterrizaje ha sido iniciado por el usuario
+    aterrizaje_iniciado = true;
+
+    post("/land")
+        .catch(() => {
+            alert('Error al enviar comando de aterrizaje');
+        });
 }
 
 function moverDron(dir) {
@@ -136,6 +154,19 @@ setInterval(() => {
                 botonDespegar.classList.add('boton-verde');
             }
 
+            // Actualizar estado del botón de aterrizar: solo cambiar a verde si el aterrizaje fue iniciado por el usuario
+            const botonAterrizar = document.getElementById('botonAterrizar');
+            if (estado === "landing") {
+                // Mientras el autopilot indique 'landing' mantenemos amarillo
+                botonAterrizar.classList.remove('boton-verde');
+                botonAterrizar.classList.add('boton-amarillo');
+            } else if (aterrizaje_iniciado && (estado === "connected" || estado === "landed")) {
+                // El dron ha terminado de aterrizar y el aterrizaje fue iniciado por este cliente: marcar verde
+                botonAterrizar.classList.remove('boton-amarillo');
+                botonAterrizar.classList.add('boton-verde');
+                // Resetear la bandera para que futuros estados 'connected' no recoloreen el botón
+                aterrizaje_iniciado = false;
+            }
 
         })
         .catch(() => {});
