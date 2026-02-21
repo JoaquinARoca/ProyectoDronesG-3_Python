@@ -46,153 +46,171 @@
 </style>
 
 <body>
-    <div class="container mt-3">
+<div class="container mt-3">
 
-        <!-- Botón Conectar -->
-        <button id="botonConectar" class="boton" onclick="conectarDron()">Conectar con Dron</button>
+    <!-- Botón Conectar -->
+    <button id="botonConectar" class="boton" onclick="conectarDron()">Conectar con Dron</button>
 
-        <!-- Altura + despegar -->
-        <input type="number" id="altura" class="form-control mb-2" placeholder="Altura en metros">
-        <button id="botonDespegar" class="boton" onclick="despegarDron()">Despegar</button>
+    <!-- Altura + despegar -->
+    <input type="number" id="altura" class="form-control mb-2" placeholder="Altura en metros">
+    <button id="botonDespegar" class="boton" onclick="despegarDron()">Despegar</button>
 
-        <!-- Botón Aterrizar -->
-        <button id="botonAterrizar" class="boton" onclick="aterrizarDron()">Aterrizar Dron</button>
+    <!-- Botón Aterrizar -->
+    <button id="botonAterrizar" class="boton" onclick="aterrizarDron()">Aterrizar Dron</button>
 
-        <!-- Botón RTL -->
-        <button id="botonRTL" class="boton" onclick="rtlDron()">RTL (Return)</button>
+    <!-- Botón RTL -->
+    <button id="botonRTL" class="boton" onclick="rtlDron()">RTL (Return)</button>
 
-        <!-- Botones de dirección -->
-        <div class="direction">
-            <div onclick="moverDron('NorthWest')" class="box">NW</div>
-            <div onclick="moverDron('North')" class="box">N</div>
-            <div onclick="moverDron('NorthEast')" class="box">NE</div>
-            <div onclick="moverDron('West')" class="box">W</div>
-            <div onclick="moverDron('Stop')" class="box">Stop</div>
-            <div onclick="moverDron('East')" class="box">E</div>
-            <div onclick="moverDron('SouthWest')" class="box">SW</div>
-            <div onclick="moverDron('South')" class="box">S</div>
-            <div onclick="moverDron('SouthEast')" class="box">SE</div>
-        </div>
-
-        <!-- Altitud -->
-        <div id="telemetriaDiv" style="font-size: 24px; text-align: center; width:100%; margin-top: 20px;">
-            <p><strong>Altitud:</strong> <span id="altitudValor">0</span> m</p>
-        </div>
-
+    <!-- Botones de dirección -->
+    <div class="direction">
+        <div onclick="moverDron('NorthWest')" class="box">NW</div>
+        <div onclick="moverDron('North')" class="box">N</div>
+        <div onclick="moverDron('NorthEast')" class="box">NE</div>
+        <div onclick="moverDron('West')" class="box">W</div>
+        <div onclick="moverDron('Stop')" class="box">Stop</div>
+        <div onclick="moverDron('East')" class="box">E</div>
+        <div onclick="moverDron('SouthWest')" class="box">SW</div>
+        <div onclick="moverDron('South')" class="box">S</div>
+        <div onclick="moverDron('SouthEast')" class="box">SE</div>
     </div>
+
+    <!-- Altitud -->
+    <div id="telemetriaDiv" style="font-size: 24px; text-align: center; width:100%; margin-top: 20px;">
+        <p><strong>Altitud:</strong> <span id="altitudValor">0</span> m</p>
+    </div>
+
+</div>
 
 <script>
 
-// ------------------------------------
-// FUNCIONES HTTP CLIENT → SERVIDOR
-// ------------------------------------
+    // LÓGICA JS SIMPLIFICADA Y ROBUSTA
+    // - takeoffInitiated: true si este cliente pulsó Despegar y esperamos confirmación (flying)
+    // - blockAutoGreen: si true, impedimos que el botón Despegar se ponga verde automáticamente (activado por land/rtl)
+    // Nueva bandera: true si ya confirmamos y pusimos verde el botón Despegar (persistir color hasta que user haga land/rtl)
 
-// Bandera que indica si el usuario ha iniciado un aterrizaje (para evitar que el botón se ponga verde al iniciar la página)
-let aterrizaje_iniciado = false;
+    let takeoffInitiated = false;
+    let blockAutoGreen = true; // por defecto true para evitar que al iniciar la página el botón aparezca verde
+    let despegarConfirmedGreen = false;
 
-function post(url, body = {}) {
-    return fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-    });
-}
-
-function conectarDron() {
-    post("/connect")
-        .then(() => post("/startTelemetry"))
-        .then(() => document.getElementById('botonConectar').classList.add('boton-verde'));
-}
-
-function despegarDron() {
-    const alturaInput = document.getElementById('altura');
-    const altura = alturaInput.value;
-    if (!altura) {
-        alert("Ingresa una altura válida");
-        return;
+    function post(url, body = {}) {
+        return fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
     }
 
-    post("/takeoff", { altura: altura })
-        .then(() => {
-            document.getElementById('botonDespegar').classList.add('boton-amarillo');
-        })
-        .catch(() => {
-            alert('Error al enviar comando de despegue');
-        });
-}
+    function conectarDron() {
+        post("/connect").then(() => post("/startTelemetry")).then(() => {
+            document.getElementById('botonConectar').classList.add('boton-verde');
+        }).catch(() => {});
+    }
 
-function aterrizarDron() {
-    // Marcar el botón inmediatamente en amarillo para indicar que el aterrizaje se inicia
-    const botonAterrizar = document.getElementById('botonAterrizar');
-    botonAterrizar.classList.remove('boton-verde');
-    botonAterrizar.classList.add('boton-amarillo');
+    function despegarDron() {
+        const alturaInput = document.getElementById('altura');
+        const altura = alturaInput.value;
+        if (!altura) { alert("Ingresa una altura válida"); return; }
 
-    // Indicamos que el aterrizaje ha sido iniciado por el usuario
-    aterrizaje_iniciado = true;
+        // Usuario inició takeoff -> permitimos autocoloreado y marcamos pendiente
+        takeoffInitiated = true;
+        blockAutoGreen = false;
+        despegarConfirmedGreen = false; // todavía no está confirmado
 
-    post("/land")
-        .catch(() => {
-            alert('Error al enviar comando de aterrizaje');
-        });
-}
+        // limpiar colores de otros botones
+        const bA = document.getElementById('botonAterrizar');
+        const bR = document.getElementById('botonRTL');
+        if (bA) bA.classList.remove('boton-amarillo','boton-verde');
+        if (bR) bR.classList.remove('boton-amarillo','boton-verde');
 
-function moverDron(dir) {
-    post("/move", { direction: dir });
-}
+        post('/takeoff',{altura: altura}).then(() => {
+            const bD = document.getElementById('botonDespegar');
+            if (bD) { bD.classList.remove('boton-verde'); bD.classList.add('boton-amarillo'); bD.dataset.persistent = 'false'; }
+        }).catch(()=>{ alert('Error al enviar comando de despegue'); takeoffInitiated = false; });
+    }
 
-// Función mínima RTL: envía POST /rtl y marca el botón en amarillo (feedback inmediato)
-function rtlDron() {
-    const botonRTL = document.getElementById('botonRTL');
-    // marcar amarillo inmediatamente
-    botonRTL.classList.remove('boton-verde');
-    botonRTL.classList.add('boton-amarillo');
-    post('/rtl').catch(() => { alert('Error al enviar comando RTL'); });
-}
+    function aterrizarDron() {
+        // Si aterrizas, cancelamos cualquier takeoff pendiente y bloqueamos el autoverde
+        takeoffInitiated = false;
+        blockAutoGreen = true;
+        despegarConfirmedGreen = false; // resetear: al aterrizar ya no debe mantenerse verde
 
-// ------------------------------------
-// TELEMETRÍA (Polling cada 500ms)
-// ------------------------------------
+        // limpiar colores de Despegar/RTL y marcar Aterrizar en amarillo
+        const bD = document.getElementById('botonDespegar');
+        const bR = document.getElementById('botonRTL');
+        const bA = document.getElementById('botonAterrizar');
+        if (bD) { bD.classList.remove('boton-amarillo','boton-verde'); bD.dataset.persistent = 'false'; }
+        if (bR) bR.classList.remove('boton-amarillo','boton-verde');
+        if (bA) { bA.classList.remove('boton-verde'); bA.classList.add('boton-amarillo'); }
 
-setInterval(() => {
-    fetch("/telemetry")
-        .then(r => r.json())
-        .then(data => {
-            document.getElementById("altitudValor").innerText = data.alt.toFixed(2);
+        post('/land').catch(()=>{ alert('Error al enviar comando de aterrizaje'); });
+    }
+
+    function rtlDron() {
+        // Similar a aterrizar: cancelar takeoff y bloquear autoverde
+        takeoffInitiated = false;
+        blockAutoGreen = true;
+        despegarConfirmedGreen = false; // resetear: al RTL ya no debe mantenerse verde
+
+        const bD = document.getElementById('botonDespegar');
+        const bA = document.getElementById('botonAterrizar');
+        const bR = document.getElementById('botonRTL');
+        if (bD) { bD.classList.remove('boton-amarillo','boton-verde'); bD.dataset.persistent = 'false'; }
+        if (bA) bA.classList.remove('boton-amarillo','boton-verde');
+        if (bR) { bR.classList.remove('boton-verde'); bR.classList.add('boton-amarillo'); }
+
+        post('/rtl').catch(()=>{ alert('Error al enviar comando RTL'); });
+    }
+
+    function moverDron(dir) { post('/move',{direction: dir}).catch(()=>{}); }
+
+    // telemetría polling simple
+    setInterval(()=>{
+        fetch('/telemetry').then(r=>r.json()).then(data=>{
+            // altitud
+            const altSpan = document.getElementById('altitudValor');
+            if (altSpan && typeof data.alt === 'number') altSpan.innerText = data.alt.toFixed(2);
+
             const estado = data.state;
 
-            if (estado === "flying") {
-                const botonDespegar = document.getElementById('botonDespegar');
-                botonDespegar.classList.remove('boton-amarillo');
-                botonDespegar.classList.add('boton-verde');
+            // Si el dron está volando y este cliente pidió takeoff y no está bloqueado, ponemos verde
+            const botonDespegar = document.getElementById('botonDespegar');
+            if (estado === 'flying') {
+                if (takeoffInitiated && !blockAutoGreen) {
+                    if (botonDespegar) { botonDespegar.classList.remove('boton-amarillo'); botonDespegar.classList.add('boton-verde'); }
+                    takeoffInitiated = false; // ya confirmado
+                    despegarConfirmedGreen = true; // persistir el verde
+                    // marcar persistencia en el DOM para evitar que otras rutinas lo borren
+                    if (botonDespegar) botonDespegar.dataset.persistent = 'true';
+                }
             }
 
-            // Actualizar estado del botón de aterrizar: solo cambiar a verde si el aterrizaje fue iniciado por el usuario
+            // aterrizar: mantener amarillo mientras 'landing'; poner verde solo si fue iniciado por este cliente (aterrizaje local)
             const botonAterrizar = document.getElementById('botonAterrizar');
-            if (estado === "landing") {
-                // Mientras el autopilot indique 'landing' mantenemos amarillo
-                botonAterrizar.classList.remove('boton-verde');
-                botonAterrizar.classList.add('boton-amarillo');
-            } else if (aterrizaje_iniciado && (estado === "connected" || estado === "landed")) {
-                // El dron ha terminado de aterrizar y el aterrizaje fue iniciado por este cliente: marcar verde
-                botonAterrizar.classList.remove('boton-amarillo');
-                botonAterrizar.classList.add('boton-verde');
-                // Resetear la bandera para que futuros estados 'connected' no recoloreen el botón
-                aterrizaje_iniciado = false;
+            if (estado === 'landing') {
+                if (botonAterrizar) { botonAterrizar.classList.remove('boton-verde'); botonAterrizar.classList.add('boton-amarillo'); }
+            } else if (estado === 'landed' || estado === 'connected') {
+                // si el botón estaba en amarillo y el usuario inició el aterrizaje justo antes, lo ponemos verde
+                if (botonAterrizar && botonAterrizar.classList.contains('boton-amarillo')) {
+                    botonAterrizar.classList.remove('boton-amarillo'); botonAterrizar.classList.add('boton-verde');
+                }
             }
 
-            // Manejo sencillo del botón RTL: si el dron está retornando, marcamos amarillo; si está connected y el botón estaba amarillo, lo ponemos verde
+            // RTL: comportamiento visual simple
             const botonRTL = document.getElementById('botonRTL');
             if (estado === 'returning') {
-                botonRTL.classList.remove('boton-verde');
-                botonRTL.classList.add('boton-amarillo');
-            } else if (estado === 'connected' && botonRTL.classList.contains('boton-amarillo')) {
-                botonRTL.classList.remove('boton-amarillo');
-                botonRTL.classList.add('boton-verde');
+                if (botonRTL) { botonRTL.classList.remove('boton-verde'); botonRTL.classList.add('boton-amarillo'); }
+            } else if (estado === 'connected') {
+                if (botonRTL && botonRTL.classList.contains('boton-amarillo')) { botonRTL.classList.remove('boton-amarillo'); botonRTL.classList.add('boton-verde'); }
             }
 
-        })
-        .catch(() => {});
-}, 500);
+            // Persistir verde en el botón Despegar si ya lo confirmamos por nuestro takeoff
+            if (despegarConfirmedGreen) {
+                const bD = document.getElementById('botonDespegar');
+                if (bD) { bD.classList.remove('boton-amarillo'); bD.classList.add('boton-verde'); bD.dataset.persistent = 'true'; }
+            }
+
+        }).catch(()=>{});
+    },500);
 
 </script>
 
