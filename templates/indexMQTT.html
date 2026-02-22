@@ -61,6 +61,9 @@
         <!-- 🔵 Botón de aterrizar (tercera fila, ancho completo) -->
         <button id="botonAterrizar" class="boton" onclick="aterrizarDron()">Aterrizar Dron</button>
 
+        <!-- 🔵 Botón RTL (nuevo) -->
+        <button id="botonRTL" class="boton" onclick="rtlDron()">RTL</button>
+
         <!-- 🔵 Botones de dirección -->
         <div class="direction">
             <div onclick="moverDron('NorthWest')" class="box">NW</div>
@@ -82,6 +85,13 @@
     </div>
 
     <script>
+        // simple flag: true si el despegue fue iniciado desde este cliente
+        var despegueIniciado = false;
+        // simple flag: true si el aterrizaje fue iniciado desde este cliente
+        var aterrizajeIniciado = false;
+        // simple flag: true si el RTL fue iniciado desde este cliente
+        var rtlIniciado = false;
+
         const client = mqtt.connect('ws://broker.hivemq.com:8000/mqtt', {
             clean: false,
             keepalive: 60,
@@ -95,20 +105,80 @@
         });
 
         client.on('message', function (topic, message) {
-            if (topic === "autopilotServiceDemo/mobileFlask/telemetryInfo") {
-                const data = JSON.parse(message.toString());
-                const alt = data.alt;
-                const estado = data.state;
+            // Manejo de telemetría en el topic telemetryInfo
+            if (topic.endsWith("/telemetryInfo")) {
+                try {
+                    const data = JSON.parse(message.toString());
+                    const alt = data.alt;
+                    const estado = data.state;
 
-                if (estado === "flying") {
+                    // solo ponemos verde si nosotros iniciamos el despegue
+                    if (estado === "flying" && despegueIniciado) {
+                        const botonDespegar = document.getElementById('botonDespegar');
+                        botonDespegar.classList.remove('boton-amarillo');
+                        botonDespegar.classList.add('boton-verde');
+                        // ya no estamos esperando el fin del despegue
+                        despegueIniciado = false;
+                    }
+
+                    // si recibimos telemetría con estado 'landed' y nosotros iniciamos el aterrizaje
+                    if (estado === "landed" && aterrizajeIniciado) {
+                        const botonAterrizar = document.getElementById('botonAterrizar');
+                        botonAterrizar.classList.remove('boton-amarillo');
+                        botonAterrizar.classList.add('boton-verde');
+                        aterrizajeIniciado = false;
+                    }
+
+                    // si recibimos telemetría con estado 'atHome' o 'landed' y nosotros iniciamos RTL
+                    if ((estado === "atHome" || estado === "landed") && rtlIniciado) {
+                        const botonRTL = document.getElementById('botonRTL');
+                        botonRTL.classList.remove('boton-amarillo');
+                        botonRTL.classList.add('boton-verde');
+                        rtlIniciado = false;
+                    }
+
+                    if (typeof alt === 'number') {
+                        document.getElementById("altitudValor").innerText = alt.toFixed(2);
+                    } else {
+                        const altNum = parseFloat(alt);
+                        if (!isNaN(altNum)) document.getElementById("altitudValor").innerText = altNum.toFixed(2);
+                    }
+                } catch (e) {
+                    console.log('Error parseando telemetryInfo:', e, message.toString());
+                }
+            }
+
+            // eventos puntuales publicados por AutopilotService
+            else if (topic === 'autopilotServiceDemo/mobileFlask/flying') {
+                // si iniciamos el despegue, ponemos verde cuando llega el evento
+                if (despegueIniciado) {
                     const botonDespegar = document.getElementById('botonDespegar');
                     botonDespegar.classList.remove('boton-amarillo');
                     botonDespegar.classList.add('boton-verde');
+                    despegueIniciado = false;
                 }
-
-                document.getElementById("altitudValor").innerText = alt.toFixed(2);
             }
-        });
+
+            else if (topic === 'autopilotServiceDemo/mobileFlask/landed' || topic === 'autopilotServiceDemo/mobileFlask/atHome' || topic === 'autopilotServiceDemo/mobileFlask/landing') {
+                // evento de aterrizaje o RTL: limpiar Despegar y manejar Aterrizar/RTL si fueron iniciados aquí
+                const botonDespegar = document.getElementById('botonDespegar');
+                botonDespegar.classList.remove('boton-verde');
+                botonDespegar.classList.remove('boton-amarillo');
+                despegueIniciado = false;
+                if (aterrizajeIniciado) {
+                    const botonAterrizar = document.getElementById('botonAterrizar');
+                    botonAterrizar.classList.remove('boton-amarillo');
+                    botonAterrizar.classList.add('boton-verde');
+                    aterrizajeIniciado = false;
+                }
+                if (rtlIniciado) {
+                    const botonRTL = document.getElementById('botonRTL');
+                    botonRTL.classList.remove('boton-amarillo');
+                    botonRTL.classList.add('boton-verde');
+                    rtlIniciado = false;
+                }
+            }
+         });
 
         function conectarDron() {
             client.publish('mobileFlask/autopilotServiceDemo/connect');
@@ -120,6 +190,11 @@
             const altura = document.getElementById('altura').value;
             if (altura) {
                 client.publish('mobileFlask/autopilotServiceDemo/arm_takeOff', altura);
+                // marcamos que iniciamos el despegue desde aquí
+                despegueIniciado = true;
+                // limpiamos colores de otras acciones
+                const bA = document.getElementById('botonAterrizar'); if (bA) { bA.classList.remove('boton-verde'); bA.classList.remove('boton-amarillo'); }
+                const bR = document.getElementById('botonRTL'); if (bR) { bR.classList.remove('boton-verde'); bR.classList.remove('boton-amarillo'); rtlIniciado = false; }
                 document.getElementById('botonDespegar').classList.add('boton-amarillo');
             } else {
                 alert("Por favor, ingrese una altura válida.");
@@ -128,6 +203,30 @@
 
         function aterrizarDron() {
             client.publish('mobileFlask/autopilotServiceDemo/Land');
+            // marcamos que iniciamos el aterrizaje desde aquí y ponemos el botón amarillo
+            aterrizajeIniciado = true;
+            const botonAterrizar = document.getElementById('botonAterrizar');
+            botonAterrizar.classList.remove('boton-verde');
+            botonAterrizar.classList.add('boton-amarillo');
+            // también quitamos el color del botón Despegar
+            const botonDespegar = document.getElementById('botonDespegar');
+            botonDespegar.classList.remove('boton-verde');
+            botonDespegar.classList.remove('boton-amarillo');
+            // y quitamos color de RTL si hay
+            const botonRTL = document.getElementById('botonRTL'); if (botonRTL) { botonRTL.classList.remove('boton-verde'); botonRTL.classList.remove('boton-amarillo'); rtlIniciado = false; }
+            despegueIniciado = false;
+        }
+
+        function rtlDron() {
+            client.publish('mobileFlask/autopilotServiceDemo/RTL');
+            // marcamos que iniciamos RTL y ponemos amarillo
+            rtlIniciado = true;
+            const botonRTL = document.getElementById('botonRTL');
+            botonRTL.classList.remove('boton-verde');
+            botonRTL.classList.add('boton-amarillo');
+            // limpiar colores de otros botones
+            const botonDespegar = document.getElementById('botonDespegar'); if (botonDespegar) { botonDespegar.classList.remove('boton-verde'); botonDespegar.classList.remove('boton-amarillo'); despegueIniciado = false; }
+            const botonAterrizar = document.getElementById('botonAterrizar'); if (botonAterrizar) { botonAterrizar.classList.remove('boton-verde'); botonAterrizar.classList.remove('boton-amarillo'); aterrizajeIniciado = false; }
         }
 
         function moverDron(direction) {
