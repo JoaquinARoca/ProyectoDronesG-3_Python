@@ -64,18 +64,27 @@ def RTL():
     RTLBtn['bg'] = 'yellow'
 
 def go (direction, btn):
-    global dron, previousBtn
+    global dron, previousBtn, currentDirection, speedSldr
     # cambio el color del anterior boton clicado (si lo hay)
     if previousBtn:
         previousBtn['fg'] = 'black'
         previousBtn['bg'] = 'dark orange'
 
-    client.publish('interfazGlobal/autopilotServiceDemo/go', direction)
+    # enviamos también la velocidad actual junto a la dirección en el payload
+    try:
+        speed = float(speedSldr.get())
+    except Exception:
+        speed = 1.0
+    payload = f"{direction}|{speed}"
+    client.publish('interfazGlobal/autopilotServiceDemo/go', payload)
+
     # pongo en verde el boton clicado
     btn['fg'] = 'white'
     btn['bg'] = 'green'
     # tomo nota de que este es el último botón clicado
     previousBtn = btn
+    # guardo la direccion actual
+    currentDirection = direction
 
 
 def startTelem():
@@ -84,15 +93,33 @@ def startTelem():
 
 def stopTelem():
     global dron
-    client.publish('interfazGlobal/autopilotServiceDemo/stopTelem')
+    client.publish('interfazGlobal/autopilotServiceDemo/stopTelemetry')
 
 def changeHeading (event):
     global dron
     global gradesSldr
+    try:
+        # obtener el valor del slider y publicarlo al servicio
+        deg = float(gradesSldr.get())
+        client.publish('interfazGlobal/autopilotServiceDemo/changeHeading', str(deg))
+    except Exception as e:
+        print('Error publicando changeHeading:', e)
 
 def changeNavSpeed (event):
     global dron
-    global speedSldr
+    global speedSldr, currentDirection
+    try:
+        speed = float(speedSldr.get())
+        client.publish('interfazGlobal/autopilotServiceDemo/changeNavSpeed', str(speed))
+        # reenviamos la orden de navegación para que se aplique la nueva velocidad
+        try:
+            if currentDirection is not None:
+                payload = f"{currentDirection}|{speed}"
+                client.publish('interfazGlobal/autopilotServiceDemo/go', payload)
+        except Exception:
+            pass
+    except Exception as e:
+        print('Error publicando changeNavSpeed:', e)
 
 
 def on_connect(client, userdata, flags, rc):

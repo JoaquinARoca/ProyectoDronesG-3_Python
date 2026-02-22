@@ -44,8 +44,28 @@ def on_message(cli, userdata, message):
 
     if command == 'go':
         if dron.state == 'flying':
-            direction = message.payload.decode("utf-8")
-            dron.go(direction)
+            payload = message.payload.decode("utf-8")
+            # aceptar formatos: "Direction" o "Direction|Speed"
+            try:
+                if '|' in payload:
+                    parts = payload.split('|')
+                    direction = parts[0]
+                    try:
+                        speed = float(parts[1])
+                        # aplicar velocidad solicitada
+                        try:
+                            dron.changeNavSpeed(speed)
+                        except Exception as e:
+                            print('go: error aplicando changeNavSpeed:', e)
+                    except Exception:
+                        # si no es número, ignoramos speed
+                        direction = payload
+                else:
+                    direction = payload
+                # ejecutar navegación
+                dron.go(direction)
+            except Exception as e:
+                print('Error procesando go payload:', payload, e)
 
     # mínimo: manejar changeHeading publicado por la UI
     if command == 'changeHeading':
@@ -90,6 +110,27 @@ def on_message(cli, userdata, message):
                     print('changeHeading ignorado: dron no en estado flying')
         except Exception as e:
             print('Error procesando changeHeading:', e)
+
+    # manejo mínimo de cambio de velocidad por MQTT
+    if command == 'changeNavSpeed':
+        try:
+            payload = message.payload.decode('utf-8')
+            if payload is None or payload == '':
+                print('changeNavSpeed: payload vacío')
+            else:
+                try:
+                    speed = float(payload)
+                except Exception:
+                    print('changeNavSpeed: payload no numérico:', payload)
+                    speed = None
+                if speed is not None:
+                    print(f'AutopilotService: aplicar changeNavSpeed = {speed} m/s')
+                    try:
+                        dron.changeNavSpeed(speed)
+                    except Exception as e:
+                        print('Error aplicando changeNavSpeed en dron:', e)
+        except Exception as e:
+            print('Error procesando changeNavSpeed:', e)
 
     if command == 'Land':
         if dron.state == 'flying':

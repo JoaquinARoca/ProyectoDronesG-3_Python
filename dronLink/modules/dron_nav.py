@@ -86,7 +86,6 @@ def _stopGo(self):
 
 
 
-
 def changeNavSpeed (self, speed):
     self.navSpeed = speed
     newParameters = [{'ID': "WPNAV_SPEED", 'Value': speed*100}]
@@ -131,6 +130,3 @@ def go(self, direction):
             self.cmd = self._prepare_command(0, 0, -speed, bodyRef=True)
         if direction == "Down":
             self.cmd = self._prepare_command(0, 0, speed, bodyRef=True)
-
-
-
