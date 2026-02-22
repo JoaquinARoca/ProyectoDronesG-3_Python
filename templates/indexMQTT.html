@@ -56,6 +56,13 @@
 
         <!-- 🔵 Altura + despegar (segunda fila, orden vertical, ancho completo) -->
         <input type="number" id="altura" class="form-control mb-2" placeholder="Altura en metros">
+
+        <!-- 🔵 Control sencillo para cambiar heading -->
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+            <input id="headingRange" type="range" min="0" max="360" value="0" style="flex:1;" oninput="document.getElementById('headingVal').innerText=this.value;" onchange="cambiarHeading(this.value)">
+            <div style="width:70px; text-align:center;"> <span id="headingVal">0</span>°</div>
+        </div>
+
         <button id="botonDespegar" class="boton" onclick="despegarDron()">Despegar</button>
 
         <!-- 🔵 Botón de aterrizar (tercera fila, ancho completo) -->
@@ -232,6 +239,19 @@
         function moverDron(direction) {
             client.publish('mobileFlask/autopilotServiceDemo/go', direction);
         }
+
+        // función simple para cambiar el heading: valida y publica (no toca autopilot)
+        function cambiarHeading(val) {
+            // val viene del onchange del range
+            const deg = Number(val);
+            if (isNaN(deg) || deg < 0 || deg > 360) { alert('Heading inválido'); return; }
+            // publicar al topic changeHeading (payload: grados)
+            client.publish('mobileFlask/autopilotServiceDemo/changeHeading', String(deg));
+            // solo actualizar el número mostrado; no tocamos clases o flags de botones
+            const hv = document.getElementById('headingVal');
+            hv.innerText = deg;
+         }
+
     </script>
 
 </body>

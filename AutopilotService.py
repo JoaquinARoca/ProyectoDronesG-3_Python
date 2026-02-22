@@ -47,6 +47,50 @@ def on_message(cli, userdata, message):
             direction = message.payload.decode("utf-8")
             dron.go(direction)
 
+    # mínimo: manejar changeHeading publicado por la UI
+    if command == 'changeHeading':
+        try:
+            payload = message.payload.decode("utf-8")
+            if payload is None or payload == '':
+                print('changeHeading: payload vacío')
+            else:
+                deg = float(payload) % 360
+                if dron.state == 'flying':
+                    # si disponemos de heading actual, giramos por el lado más corto usando rotate
+                    try:
+                        current = dron.heading
+                        if current is None:
+                            # fallback: usar cambio absoluto
+                            dron.changeHeading(deg, blocking=False)
+                            print(f'changeHeading (fallback absoluto) solicitado: {deg}°')
+                        else:
+                            # normalizamos y calculamos delta en [-180,180]
+                            cur = float(current) % 360
+                            delta = (deg - cur + 360) % 360
+                            if delta > 180:
+                                # giro más corto en ccw
+                                offset = 360 - delta
+                                direction = 'ccw'
+                            else:
+                                offset = delta
+                                direction = 'cw'
+                            # si el offset es muy pequeño, no hacer nada
+                            if offset < 1.0:
+                                print(f'changeHeading: ya cerca de {deg}° (actual {cur}°), offset {offset}°')
+                            else:
+                                dron.rotate(offset, direction=direction, blocking=False)
+                                print(f'rotate solicitado: {offset}° {direction} para llegar a {deg}° (actual {cur}°)')
+                    except Exception as e:
+                        print('Error intentando rotate, fallback a changeHeading:', e)
+                        try:
+                            dron.changeHeading(deg, blocking=False)
+                        except Exception as e2:
+                            print('Fallback changeHeading también falló:', e2)
+                else:
+                    print('changeHeading ignorado: dron no en estado flying')
+        except Exception as e:
+            print('Error procesando changeHeading:', e)
+
     if command == 'Land':
         if dron.state == 'flying':
             # operación no bloqueante. Cuando acabe publicará el evento correspondiente
@@ -90,4 +134,3 @@ client.connect (broker_address,broker_port)
 client.subscribe('+/autopilotServiceDemo/#')
 print ('AutopilotServiceDemo esperando peticiones')
 client.loop_forever()
-
