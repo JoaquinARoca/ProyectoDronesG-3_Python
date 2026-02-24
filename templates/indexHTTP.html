@@ -57,6 +57,8 @@
 
         <!-- Botón Aterrizar -->
         <button id="botonAterrizar" class="boton" onclick="aterrizarDron()">Aterrizar Dron</button>
+        <!-- Botón RTL -->
+        <button id="botonRtl" class="boton" onclick="rtlDron()">Return to Launch (RTL)</button>
 
         <!-- Botones de dirección -->
         <div class="direction">
@@ -112,9 +114,19 @@ function despegarDron() {
 }
 
 function aterrizarDron() {
-    post("/land");
+    post("/land")
+        .then(() => {
+            document.getElementById('botonAterrizar').classList.add('boton-amarillo');
+        });
 }
 
+function rtlDron() {
+    post("/rtl")
+        .then(() => {
+            // Añadimos la clase amarilla al hacer clic
+            document.getElementById('botonRtl').classList.add('boton-amarillo');
+        });
+}
 function moverDron(dir) {
     post("/move", { direction: dir });
 }
@@ -136,6 +148,17 @@ setInterval(() => {
                 botonDespegar.classList.add('boton-verde');
             }
 
+            const botonAterrizar = document.getElementById('botonAterrizar');
+            if (botonAterrizar.classList.contains('boton-amarillo') && estado === "connected") {
+                botonAterrizar.classList.remove('boton-amarillo');
+                botonAterrizar.classList.add('boton-verde');
+            }
+
+            const botonRtl = document.getElementById('botonRtl');
+            if (botonRtl.classList.contains('boton-amarillo') && estado === "connected") {
+                botonRtl.classList.remove('boton-amarillo');
+                botonRtl.classList.add('boton-verde');
+            }
 
         })
         .catch(() => {});

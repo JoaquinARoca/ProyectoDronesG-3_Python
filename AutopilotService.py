@@ -64,6 +64,16 @@ def on_message(cli, userdata, message):
     if command == 'stopTelemetry':
         dron.stop_sending_telemetry_info()
 
+    if command == 'changeHeading':
+        if dron.state == 'flying':
+            heading = float(message.payload.decode("utf-8"))
+            dron.changeHeading(int(heading))
+
+    if command == 'changeNavSpeed':
+        if dron.state == 'flying':
+            speed = float(message.payload.decode("utf-8"))
+            dron.changeNavSpeed(float(speed))
+
 
 def on_connect(client, userdata, flags, rc):
     global connected

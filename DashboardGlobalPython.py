@@ -83,16 +83,24 @@ def startTelem():
     client.publish('interfazGlobal/autopilotServiceDemo/startTelemetry')
 
 def stopTelem():
-    global dron
-    client.publish('interfazGlobal/autopilotServiceDemo/stopTelem')
+    global dron, altShowLbl, headingShowLbl, stateShowLbl
+    client.publish('interfazGlobal/autopilotServiceDemo/stopTelemetry')
+    altShowLbl['text'] = ''
+    headingShowLbl['text'] = ''
+    stateShowLbl['text'] = ''
+
 
 def changeHeading (event):
     global dron
     global gradesSldr
+    heading = gradesSldr.get()
+    client.publish('interfazGlobal/autopilotServiceDemo/changeHeading', str(heading))
 
 def changeNavSpeed (event):
     global dron
     global speedSldr
+    speed = speedSldr.get()
+    client.publish('interfazGlobal/autopilotServiceDemo/changeNavSpeed', str(speed))
 
 
 def on_connect(client, userdata, flags, rc):
@@ -185,8 +193,8 @@ def crear_ventana():
     arm_takeOffBtn.grid(row=1, column=0, columnspan=2, padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
 
     # Slider para seleccionar el heading
-    gradesSldr = tk.Scale(ventana, label="Grados:", resolution=5, from_=0, to=360, tickinterval=45,
-                              orient=tk.HORIZONTAL)
+    gradesSldr = tk.Scale(ventana, label="Grados:", resolution=5, from_=0, to=360, tickinterval=45,orient=tk.HORIZONTAL)
+    gradesSldr.set(180)
     gradesSldr.grid(row=4, column=0, columnspan=2,padx=5, pady=5, sticky=tk.N + tk.S + tk.E + tk.W)
     gradesSldr.bind("<ButtonRelease-1>", changeHeading)
 

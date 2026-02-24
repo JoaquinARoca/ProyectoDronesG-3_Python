@@ -99,6 +99,11 @@ def http_land():
     topic = f"{TOPIC_PREFIX_PUB}/Land"
     mqtt_client.publish(topic, "")
     return ("", 204)
+@app.route("/rtl", methods=["POST"])
+def http_rtl():
+    topic = f"{TOPIC_PREFIX_PUB}/RTL"
+    mqtt_client.publish(topic, "")
+    return ("", 204)
 
 @app.route("/move", methods=["POST"])
 def http_move():
